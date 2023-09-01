@@ -1,0 +1,378 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Translators:
+# Ammuu5, 2017
+# Jiri Grönroos <jiri.gronroos@iki.fi>, 2013,2018-2020
+# Pasi Lallinaho <pasi@shimmerproject.org>, 2017-2019
+msgid ""
+msgstr ""
+"Project-Id-Version: Xfce Apps\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-05-06 00:47+0200\n"
+"PO-Revision-Date: 2020-06-10 20:49+0000\n"
+"Last-Translator: Jiri Grönroos <jiri.gronroos@iki.fi>\n"
+"Language-Team: Finnish (http://www.transifex.com/xfce/xfce-apps/language/fi/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: fi\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../common/xfce-notify-log.c:385
+msgid "Do you really want to clear the notification log?"
+msgstr "Haluatko varmasti tyhjentää ilmoituslokin?"
+
+#: ../common/xfce-notify-log.c:389
+msgid "Clear notification log"
+msgstr "Tyhjennä ilmoitusloki"
+
+#: ../common/xfce-notify-log.c:392
+msgid "Cancel"
+msgstr "Peru"
+
+#: ../common/xfce-notify-log.c:394 ../xfce4-notifyd-config/main.c:960
+msgid "Clear"
+msgstr "Tyhjennä"
+
+#: ../common/xfce-notify-log.c:407
+msgid "include icon cache"
+msgstr "sisällytä kuvakkeiden välimuisti"
+
+#: ../panel-plugin/notification-plugin.c:225
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:12
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.desktop.in.h:1
+msgid "Notifications"
+msgstr "Ilmoitukset"
+
+#: ../panel-plugin/notification-plugin-dialogs.c:52
+#, c-format
+msgid "Unable to open the following url: %s"
+msgstr "Ei voitu avata osoitetta: %s"
+
+#. create the dialog
+#: ../panel-plugin/notification-plugin-dialogs.c:77
+msgid "Notification Plugin Settings"
+msgstr "Ilmoituslisäosan asetukset"
+
+#: ../panel-plugin/notification-plugin-dialogs.c:80
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:14
+msgid "_Help"
+msgstr "_Ohje"
+
+#: ../panel-plugin/notification-plugin-dialogs.c:81
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:15
+msgid "_Close"
+msgstr "_Sulje"
+
+#: ../panel-plugin/notification-plugin-dialogs.c:99
+msgid "Number of notifications to show"
+msgstr "Näytettävien ilmoitusten määrä"
+
+#: ../panel-plugin/notification-plugin-dialogs.c:111
+msgid "Only show notifications from today"
+msgstr "Näytä vain tämän päivän ilmoitukset"
+
+#: ../panel-plugin/notification-plugin-dialogs.c:148
+msgid "This is the notification plugin"
+msgstr "Tämä on ilmoituslisäosa"
+
+#: ../panel-plugin/notification-plugin-dialogs.c:150
+msgid "Copyright © 2017 Simon Steinbeiß\n"
+msgstr "Tekijänoikeus © 2017 Simon Steinbeiß\n"
+
+#: ../panel-plugin/notification-plugin-log.c:132
+msgid "<b>_Do not disturb</b>"
+msgstr "<b>_Älä häiritse</b>"
+
+#: ../panel-plugin/notification-plugin-log.c:318
+msgid "No notifications"
+msgstr "Ei ilmoituksia"
+
+#: ../panel-plugin/notification-plugin-log.c:339
+msgid "_Clear log"
+msgstr "_Tyhjennä loki"
+
+#: ../panel-plugin/notification-plugin-log.c:347
+msgid "_Notification settings…"
+msgstr "_Ilmoitusasetukset..."
+
+#: ../panel-plugin/notification-plugin.desktop.in.h:1
+msgid "Notification Plugin"
+msgstr "Ilmoituslisäosa"
+
+#: ../panel-plugin/notification-plugin.desktop.in.h:2
+msgid "Notification plugin for the Xfce panel"
+msgstr "Ilmoituslisäosa Xfce:n paneelille"
+
+#: ../xfce4-notifyd/main.c:53 ../xfce4-notifyd/main.c:63
+#: ../xfce4-notifyd-config/main.c:805
+msgid "Xfce Notify Daemon"
+msgstr "Xfce:n ilmoituspalvelu"
+
+#: ../xfce4-notifyd/main.c:56
+#, c-format
+msgid "Unknown option \"%s\"\n"
+msgstr "Tuntematon valitsin \"%s\"\n"
+
+#: ../xfce4-notifyd/main.c:65
+msgid "Unable to start notification daemon"
+msgstr "Ilmoituspalvelua ei voi käynnistää"
+
+#: ../xfce4-notifyd/xfce-notify-daemon.c:405
+#, c-format
+msgid "Another notification daemon is running, exiting\n"
+msgstr "Toinen ilmoitussovellus on käynnissä, poistutaan\n"
+
+#: ../xfce4-notifyd-config/main.c:78
+msgid "Notification Preview"
+msgstr "Ilmoituksen esikatselu"
+
+#: ../xfce4-notifyd-config/main.c:79
+msgid "This is what notifications will look like"
+msgstr "Tältä ilmoitus näyttää"
+
+#: ../xfce4-notifyd-config/main.c:84
+msgid "Button"
+msgstr "Painike"
+
+#: ../xfce4-notifyd-config/main.c:91
+msgid "Notification preview failed"
+msgstr "Ilmoituksen esikatselua ei voi näyttää"
+
+#: ../xfce4-notifyd-config/main.c:505
+#, c-format
+msgid ""
+"<b>Currently only urgent notifications are shown.</b>\n"
+"Notification logging is %s."
+msgstr "<b>Vain kiireelliset ilmoitukset näytetään.</b>\nIlmoituslogi on %s."
+
+#: ../xfce4-notifyd-config/main.c:512
+msgid "enabled"
+msgstr "käytössä"
+
+#: ../xfce4-notifyd-config/main.c:512
+msgid "disabled"
+msgstr "pois käytöstä"
+
+#: ../xfce4-notifyd-config/main.c:589
+msgid "Yesterday and before"
+msgstr "Eilen ja sitä ennen"
+
+#: ../xfce4-notifyd-config/main.c:807
+msgid "Settings daemon is unavailable"
+msgstr "Asetuspalveluun ei saa yhteyttä"
+
+#: ../xfce4-notifyd-config/main.c:893
+msgid ""
+"<big><b>Currently there are no known applications.</b></big>\n"
+"As soon as an application sends a notification\n"
+"it will appear in this list."
+msgstr "<big><b>Tunnettuja sovelluksia ei ole</b></big>\nSovellus lisätään tälle listalle\nheti kun se lähettää ilmoituksen."
+
+#: ../xfce4-notifyd-config/main.c:938
+msgid ""
+"<big><b>Empty log</b></big>\n"
+"No notifications have been logged yet."
+msgstr "<big><b>Tyhjä loki</b></big>\nLokissa ei ole vielä yhtään ilmoitusta."
+
+#: ../xfce4-notifyd-config/main.c:946
+msgid "Refresh"
+msgstr "Päivitä"
+
+#: ../xfce4-notifyd-config/main.c:947
+msgid "Refresh the notification log"
+msgstr "Päivitä ilmoitusloki"
+
+#: ../xfce4-notifyd-config/main.c:953
+msgid "Open"
+msgstr "Avaa"
+
+#: ../xfce4-notifyd-config/main.c:954
+msgid "Open the notification log in an external editor"
+msgstr "Avaa ilmoitusloki ulkoisessa sovelluksessa"
+
+#: ../xfce4-notifyd-config/main.c:961
+msgid "Clear the notification log"
+msgstr "Tyhjennä ilmoitusloki"
+
+#: ../xfce4-notifyd-config/main.c:983
+msgid "Display version information"
+msgstr "Näytä versiotiedot"
+
+#: ../xfce4-notifyd-config/main.c:984
+msgid "Settings manager socket"
+msgstr "Asetustenhallinnan pistoke"
+
+#: ../xfce4-notifyd-config/main.c:984
+msgid "SOCKET_ID"
+msgstr "PISTOKE"
+
+#: ../xfce4-notifyd-config/main.c:994
+#, c-format
+msgid "Type '%s --help' for usage."
+msgstr "Saat käyttöohjeita komennolla \"%s --help\"."
+
+#: ../xfce4-notifyd-config/main.c:1009
+#, c-format
+msgid "Released under the terms of the GNU General Public License, version 2\n"
+msgstr "Julkaistu GNU GPL -lisenssin version 2 ehdoilla\n"
+
+#: ../xfce4-notifyd-config/main.c:1010
+#, c-format
+msgid "Please report bugs to %s.\n"
+msgstr "Ilmoita ohjelmavirheistä osoitteeseen %s.\n"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:1
+msgid "only during \"Do not disturb\""
+msgstr "vain \"Älä häiritse\"-tilassa"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:2
+msgid "always"
+msgstr "aina"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:3
+msgid "all"
+msgstr "kaikki"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:4
+msgid "all except blocked"
+msgstr "kaikki paitsi estetyt"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:5
+msgid "only blocked"
+msgstr "vain estetyt"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:6
+msgid "display with mouse pointer"
+msgstr "näytöllä, jossa hiiren osoitin on"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:7
+msgid "primary display"
+msgstr "ensisijainella näytöllä"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:8
+msgid "Top left"
+msgstr "Vasen yläkulma"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:9
+msgid "Bottom left"
+msgstr "Vasen alakulma"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:10
+msgid "Top right"
+msgstr "Oikea yläkulma"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:11
+msgid "Bottom right"
+msgstr "Oikea alakulma"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:13
+msgid "Customize your notification settings"
+msgstr "Mukauta ilmoitusasetuksiasi"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:16
+msgid ""
+"The notification service is not running. No notifications will be shown."
+msgstr "Ilmoituspalvelu ei ole käynnissä. Ilmoituksia ei näytetä."
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:17
+msgid "<b>Currently only urgent notifications are shown.</b>"
+msgstr "<b>Tällä hetkellä vain kiireelliset ilmoitukset näytetään.</b>"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:18
+msgid "Show _Preview"
+msgstr "_Esikatselu"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:19
+msgid "seconds"
+msgstr "sekuntia"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:20
+msgid "_Disappear after"
+msgstr "_Katoamisviive:"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:21
+msgid "_Opacity"
+msgstr "_Peittävyys:"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:22
+msgid "Fade out"
+msgstr "Häivytä pois"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:23
+msgid "_Slide out"
+msgstr "Liu'uta pois"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:24
+msgid "Default _position"
+msgstr "_Oletussijainti:"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:25
+msgid "_Theme"
+msgstr "_Teema"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:26
+msgid "Do not disturb"
+msgstr "Älä häiritse"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:27
+msgid "<b>Behavior</b>"
+msgstr "<b>Toiminta</b>"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:28
+msgid "<b>Appearance</b>"
+msgstr "<b>Ulkoasu</b>"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:29
+msgid "<b>Animations</b>"
+msgstr "<b>Animaatiot</b>"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:30
+msgid ""
+"By default the notification bubbles will be shown on the display on which "
+"the mouse pointer is located."
+msgstr "Oletuksena ilmoitukset näytetään näytöllä, jolla hiiren osoitin sijaitsee."
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:31
+msgid "Show notifications on"
+msgstr "Näytä ilmoitukset"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:32
+msgid "General"
+msgstr "Yleiset"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:33
+msgid "<b>Show or block notifications per application</b>"
+msgstr "<b>Näytä tai estä ilmoituksia sovelluksen perusteella</b>"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:34
+msgid "Applications"
+msgstr "Sovellukset"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:35
+msgid "Log notifications"
+msgstr "Tallenna lokiin ilmoitukset"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:36
+msgid "Log applications"
+msgstr "Tallenna lokiin sovellukset"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:37
+msgid "Log size limit"
+msgstr "Lokin kokoraja"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:38
+msgid ""
+"The maximum amount of entries to be retained in the log. Please note that a "
+"large log may lead to performance penalties. 0 means no limit."
+msgstr ""
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:39
+msgid "Log"
+msgstr "Käytä lokia"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.desktop.in.h:2
+msgid "Customize how notifications appear on your screen"
+msgstr "Mukauta näytöllesi ilmestyvien ilmoitusten toimintaa"

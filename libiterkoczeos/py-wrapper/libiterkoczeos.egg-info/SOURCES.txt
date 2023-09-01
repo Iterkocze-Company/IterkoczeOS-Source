@@ -1,0 +1,6 @@
+libiterkoczeos.py
+setup.py
+libiterkoczeos.egg-info/PKG-INFO
+libiterkoczeos.egg-info/SOURCES.txt
+libiterkoczeos.egg-info/dependency_links.txt
+libiterkoczeos.egg-info/top_level.txt

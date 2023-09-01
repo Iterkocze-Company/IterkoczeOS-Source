@@ -1,0 +1,11 @@
+prefix=/sources
+includedir=${prefix}/include
+libdir=${prefix}/lib
+srcdir=/sources/gdk-pixbuf-xlib-2.40.2
+
+Name: GdkPixbuf Xlib
+Description: GdkPixbuf rendering for Xlib
+Version: 2.40.2
+Requires: gdk-pixbuf-2.0 >=  2.39.2, x11
+Libs: -L${prefix}/gdk-pixbuf-xlib -lgdk_pixbuf_xlib-2.0
+Cflags: -I${prefix}/gdk-pixbuf-xlib -I${srcdir}/gdk-pixbuf-xlib -I${prefix} -I${srcdir}

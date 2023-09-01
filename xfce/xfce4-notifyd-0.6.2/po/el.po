@@ -1,0 +1,369 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Translators:
+# Ápo. <apostolos.papadimitriu@gmail.com>, 2016
+# Ápo. <apostolos.papadimitriu@gmail.com>, 2017
+# Efstathios Iosifidis <iosifidis@opensuse.org>, 2012
+# Georgios Zarkadas <georgios.zarkadas@gmail.com>, 2018
+# Stavros Giannouris <stavrosg@hellug.gr>, 2008
+# Πέτρος Σαμαράς <psamaras1@gmail.com>, 2017
+msgid ""
+msgstr ""
+"Project-Id-Version: Xfce Apps\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-08-01 00:32+0200\n"
+"PO-Revision-Date: 2019-07-31 22:32+0000\n"
+"Last-Translator: Efstathios Iosifidis <iefstathios@gmail.com>\n"
+"Language-Team: Greek (http://www.transifex.com/xfce/xfce-apps/language/el/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: el\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../common/xfce-notify-log.c:362
+msgid "Do you really want to clear the notification log?"
+msgstr "Θέλετε πραγματικά να καθαρίσετε το αρχείο καταγραφής ειδοποιήσεων;"
+
+#: ../common/xfce-notify-log.c:366
+msgid "Clear notification log"
+msgstr "Καθαρισμός αρχείου καταγραφής ειδοποιήσεων"
+
+#: ../common/xfce-notify-log.c:369
+msgid "Cancel"
+msgstr "Ακύρωση"
+
+#: ../common/xfce-notify-log.c:371 ../xfce4-notifyd-config/main.c:957
+msgid "Clear"
+msgstr "Καθαρισμός"
+
+#: ../common/xfce-notify-log.c:384
+msgid "include icon cache"
+msgstr "συμπερίληψη κρυφής μνήμης εικονιδίων"
+
+#: ../panel-plugin/notification-plugin.c:217
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:12
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.desktop.in.h:1
+msgid "Notifications"
+msgstr "Ειδοποιήσεις"
+
+#: ../panel-plugin/notification-plugin-dialogs.c:52
+#, c-format
+msgid "Unable to open the following url: %s"
+msgstr "Δεν ήταν δυνατό το άνοιγμα της παρακάτω διεύθυνσης url: %s"
+
+#. create the dialog
+#: ../panel-plugin/notification-plugin-dialogs.c:77
+msgid "Notification Plugin Settings"
+msgstr "Ρυθμίσεις Προσθέτου Ειδοποιήσεων"
+
+#: ../panel-plugin/notification-plugin-dialogs.c:99
+msgid "Number of notifications to show"
+msgstr "Πλήθος ειδοποιήσεων για εμφάνιση"
+
+#: ../panel-plugin/notification-plugin-dialogs.c:111
+msgid "Only show notifications from today"
+msgstr "Εμφάνιση μόνο σημερινών ειδοποιήσεων"
+
+#: ../panel-plugin/notification-plugin-dialogs.c:148
+msgid "This is the notification plugin"
+msgstr "Αυτό είναι το πρόσθετο ειδοποιήσεων"
+
+#: ../panel-plugin/notification-plugin-dialogs.c:150
+msgid "Copyright © 2017 Simon Steinbeiß\n"
+msgstr "Copyright © 2017 Simon Steinbeiß\n"
+
+#: ../panel-plugin/notification-plugin-log.c:132
+msgid "<b>_Do not disturb</b>"
+msgstr "<b>_Μην ενοχλείτε</b>"
+
+#: ../panel-plugin/notification-plugin-log.c:318
+msgid "No notifications"
+msgstr "Όχι ειδοποιήσεις"
+
+#: ../panel-plugin/notification-plugin-log.c:339
+msgid "_Clear log"
+msgstr "_Καθαρισμός αρχείου καταγραφής"
+
+#: ../panel-plugin/notification-plugin-log.c:347
+msgid "_Notification settings…"
+msgstr "Ρυθμίσεις ει_δοποιήσεων..."
+
+#: ../panel-plugin/notification-plugin.desktop.in.h:1
+msgid "Notification Plugin"
+msgstr "Πρόσθετο Ειδοποιήσεων"
+
+#: ../panel-plugin/notification-plugin.desktop.in.h:2
+msgid "Notification plugin for the Xfce panel"
+msgstr "Πρόσθετο Ειδοποιήσεων για το ταμπλό του Xfce"
+
+#: ../xfce4-notifyd/main.c:53 ../xfce4-notifyd/main.c:63
+#: ../xfce4-notifyd-config/main.c:805
+msgid "Xfce Notify Daemon"
+msgstr "Υπηρεσία ειδοποιήσεων Xfce"
+
+#: ../xfce4-notifyd/main.c:56
+#, c-format
+msgid "Unknown option \"%s\"\n"
+msgstr "Άγνωστη επιλογή \"%s\"\n"
+
+#: ../xfce4-notifyd/main.c:65
+msgid "Unable to start notification daemon"
+msgstr "Δεν ήταν δυνατή η έναρξη της υπηρεσίας ειδοποιήσεων"
+
+#: ../xfce4-notifyd/xfce-notify-daemon.c:404
+#, c-format
+msgid "Another notification daemon is running, exiting\n"
+msgstr "Μια άλλη υπηεσία ειδοποιήσεων εκτελείται ήδη, έξοδος\n"
+
+#: ../xfce4-notifyd-config/main.c:78
+msgid "Notification Preview"
+msgstr "Προεπισκόπηση Ειδοποιήσεων"
+
+#: ../xfce4-notifyd-config/main.c:79
+msgid "This is what notifications will look like"
+msgstr "Έτσι θα φαίνονται οι ειδοποιήσεις"
+
+#: ../xfce4-notifyd-config/main.c:84
+msgid "Button"
+msgstr "Κουμπί"
+
+#: ../xfce4-notifyd-config/main.c:91
+msgid "Notification preview failed"
+msgstr "Η προεπισκόπηση ειδοποιήσεων απέτυχε"
+
+#: ../xfce4-notifyd-config/main.c:505
+#, c-format
+msgid ""
+"<b>Currently only urgent notifications are shown.</b>\n"
+"Notification logging is %s."
+msgstr ""
+
+#: ../xfce4-notifyd-config/main.c:512
+msgid "enabled"
+msgstr ""
+
+#: ../xfce4-notifyd-config/main.c:512
+msgid "disabled"
+msgstr ""
+
+#: ../xfce4-notifyd-config/main.c:589
+msgid "Yesterday and before"
+msgstr ""
+
+#: ../xfce4-notifyd-config/main.c:807
+msgid "Settings daemon is unavailable"
+msgstr "Η υπηρεσία ρυθμίσεων δεν είναι διαθέσιμη"
+
+#: ../xfce4-notifyd-config/main.c:893
+msgid ""
+"<big><b>Currently there are no known applications.</b></big>\n"
+"As soon as an application sends a notification\n"
+"it will appear in this list."
+msgstr ""
+
+#: ../xfce4-notifyd-config/main.c:935
+msgid ""
+"<big><b>Empty log</b></big>\n"
+"No notifications have been logged yet."
+msgstr "<big><b>Κενό αρχείο καταγραφών</b></big>\nΔεν έχουν καταγραφεί ειδοποιήσεις ακόμη."
+
+#: ../xfce4-notifyd-config/main.c:943
+msgid "Refresh"
+msgstr "Ανανέωση"
+
+#: ../xfce4-notifyd-config/main.c:944
+msgid "Refresh the notification log"
+msgstr "Ανανέωση του αρχείου καταγραφής ειδοποιήσεων"
+
+#: ../xfce4-notifyd-config/main.c:950
+msgid "Open"
+msgstr "Άνοιγμα"
+
+#: ../xfce4-notifyd-config/main.c:951
+msgid "Open the notification log in an external editor"
+msgstr "Άνοιγμα του αρχείου καταγραφής ειδοποιήσεων σε εξωτερικό επεξεργαστή κειμένου"
+
+#: ../xfce4-notifyd-config/main.c:958
+msgid "Clear the notification log"
+msgstr "Άδειασμα του αρχείου καταγραφής ειδοποιήσεων"
+
+#: ../xfce4-notifyd-config/main.c:980
+msgid "Display version information"
+msgstr "Εμφάνιση πληροφοριών έκδοσης"
+
+#: ../xfce4-notifyd-config/main.c:981
+msgid "Settings manager socket"
+msgstr "Υποδοχή διαχειριστή ρυθμίσεων"
+
+#: ../xfce4-notifyd-config/main.c:981
+msgid "SOCKET_ID"
+msgstr "SOCKET_ID"
+
+#: ../xfce4-notifyd-config/main.c:991
+#, c-format
+msgid "Type '%s --help' for usage."
+msgstr "Πληκτρολογήστε '%s --help' για βοήθεια στη χρήση."
+
+#: ../xfce4-notifyd-config/main.c:1006
+#, c-format
+msgid "Released under the terms of the GNU General Public License, version 2\n"
+msgstr "Διανέμεται υπό τους όρους της Δημόσιας άδειας GNU, έκδοση 2\n"
+
+#: ../xfce4-notifyd-config/main.c:1007
+#, c-format
+msgid "Please report bugs to %s.\n"
+msgstr "Παρακαλώ αναφέρετε τυχόν σφάλματα στο %s.\n"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:1
+msgid "only during \"Do not disturb\""
+msgstr "Μόνο όταν το \"Μην ενοχλείτε\" είναι ενεργό"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:2
+msgid "always"
+msgstr "πάντα"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:3
+msgid "all"
+msgstr "όλα"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:4
+msgid "all except blocked"
+msgstr "όλες εκτός από τις μπλοκαρισμένες"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:5
+msgid "only blocked"
+msgstr "μόνο οι μπλοκαρισμένες"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:6
+msgid "display with mouse pointer"
+msgstr "οθόνη όπου βρίσκεται ο δείκτης ποντικιού"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:7
+msgid "primary display"
+msgstr "κύρια οθόνη"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:8
+msgid "Top left"
+msgstr "Πάνω αριστερά"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:9
+msgid "Bottom left"
+msgstr "Κάτω αριστερά"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:10
+msgid "Top right"
+msgstr "Πάνω δεξιά"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:11
+msgid "Bottom right"
+msgstr "Κάτω δεξιά"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:13
+msgid "Customize your notification settings"
+msgstr "Παραμετροποίηση των ρυθμίσεων ειδοποιήσεων"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:14
+msgid "_Help"
+msgstr "_Βοήθεια"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:15
+msgid "_Close"
+msgstr "_Κλείσιμο"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:16
+msgid ""
+"The notification service is not running. No notifications will be shown."
+msgstr "Η υπηρεσία ειδοποιήσεων δεν εκτελείται. Δεν θα εμφανιστούν ειδοποιήσεις."
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:17
+msgid "<b>Currently only urgent notifications are shown.</b>"
+msgstr "<b>Τώρα εμφανίζονται μόνο οι επείγουσες ειδοποιήσεις </b>"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:18
+msgid "Show _Preview"
+msgstr "Εμφάνιση _Προεπισκόπησης"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:19
+msgid "seconds"
+msgstr "δευτερόλεπτα"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:20
+msgid "_Disappear after"
+msgstr "_Εξαφάνιση μετά απο"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:21
+msgid "_Opacity"
+msgstr "Α_διαφάνεια"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:22
+msgid "Fade out"
+msgstr "Ξεθώριασμα"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:23
+msgid "_Slide out"
+msgstr "Ο_λίσθηση"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:24
+msgid "Default _position"
+msgstr "Προεπιλεγμένη _τοποθέτηση:"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:25
+msgid "_Theme"
+msgstr "_Θέμα"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:26
+msgid "Do not disturb"
+msgstr "Μην ενοχλείτε"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:27
+msgid "<b>Behavior</b>"
+msgstr "<b>Συμπεριφορά</b>"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:28
+msgid "<b>Appearance</b>"
+msgstr "<b>Εμφάνιση</b>"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:29
+msgid "<b>Animations</b>"
+msgstr "<b>Εφέ κίνησης</b>"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:30
+msgid ""
+"By default the notification bubbles will be shown on the display on which "
+"the mouse pointer is located."
+msgstr "Από προεπιλογή οι ειδοποιήσεις θα εμφανίζονται στην οθόνη που βρίσκεται ο δείκτης ποντικιού."
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:31
+msgid "Show notifications on"
+msgstr "Εμφάνιση ειδοποιήσεων στην"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:32
+msgid "General"
+msgstr "Γενικά"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:33
+msgid "<b>Show or block notifications per application</b>"
+msgstr "<b>Εμφάνιση ή αποτροπή ειδοποιήσεων ανά εφαρμογή</b>"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:34
+msgid "Applications"
+msgstr "Εφαρμογές"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:35
+msgid "Log notifications"
+msgstr "Καταγραφή ειδοποιήσεων"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:36
+msgid "Log applications"
+msgstr "Καταγραφή εφαρμογών"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.glade.h:37
+msgid "Log"
+msgstr "Καταγραφή"
+
+#: ../xfce4-notifyd-config/xfce4-notifyd-config.desktop.in.h:2
+msgid "Customize how notifications appear on your screen"
+msgstr "Προσαρμογή του τρόπου εμφάνισης των ειδοποιήσεων στην οθόνη"

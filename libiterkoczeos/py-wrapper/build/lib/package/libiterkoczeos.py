@@ -1,0 +1,2 @@
+def omg():
+	print('pls')
