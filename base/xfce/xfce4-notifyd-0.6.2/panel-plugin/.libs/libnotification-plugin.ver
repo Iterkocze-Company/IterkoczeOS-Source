@@ -1,3 +1,0 @@
-{ global:
-xfce_panel_module_construct;
-local: *; };
