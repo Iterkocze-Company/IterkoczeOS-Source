@@ -1,0 +1,11 @@
+/sources/core/libiterkoczeos/cs-wrapper/bin/Release/net7.0/cs-wrapper.deps.json
+/sources/core/libiterkoczeos/cs-wrapper/bin/Release/net7.0/cs-wrapper.dll
+/sources/core/libiterkoczeos/cs-wrapper/bin/Release/net7.0/cs-wrapper.pdb
+/sources/core/libiterkoczeos/cs-wrapper/obj/Release/net7.0/cs-wrapper.GeneratedMSBuildEditorConfig.editorconfig
+/sources/core/libiterkoczeos/cs-wrapper/obj/Release/net7.0/cs-wrapper.AssemblyInfoInputs.cache
+/sources/core/libiterkoczeos/cs-wrapper/obj/Release/net7.0/cs-wrapper.AssemblyInfo.cs
+/sources/core/libiterkoczeos/cs-wrapper/obj/Release/net7.0/cs-wrapper.csproj.CoreCompileInputs.cache
+/sources/core/libiterkoczeos/cs-wrapper/obj/Release/net7.0/cs-wrapper.dll
+/sources/core/libiterkoczeos/cs-wrapper/obj/Release/net7.0/refint/cs-wrapper.dll
+/sources/core/libiterkoczeos/cs-wrapper/obj/Release/net7.0/cs-wrapper.pdb
+/sources/core/libiterkoczeos/cs-wrapper/obj/Release/net7.0/ref/cs-wrapper.dll

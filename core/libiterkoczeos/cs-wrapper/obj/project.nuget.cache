@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "IStNa/5uLxf2b16mD0ZTHlOiLApT1Wl4b9WpBiSK1w57FLva8ElQL/ouq1bYMvenF75T5Yx+sVf+yO3VYksFlw==",
+  "success": true,
+  "projectFilePath": "/sources/core/libiterkoczeos/cs-wrapper/cs-wrapper.csproj",
+  "expectedPackageFiles": [
+    "/home/user/.nuget/packages/iterkocze.libiterkoczeos/1.0.0/iterkocze.libiterkoczeos.1.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
