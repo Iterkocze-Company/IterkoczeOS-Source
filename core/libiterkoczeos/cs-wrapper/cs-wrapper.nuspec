@@ -3,10 +3,14 @@
     <metadata>
         <!-- Required elements-->
         <id>Iterkocze.LibiterkoczeOS</id>
-        <version>1.0.0</version>
-        <description>a</description>
+        <version>1.0.1</version>
+        <description>libiterkoczeos wrapper for C#</description>
         <authors>Iterkocze Company.</authors>
 
+
+        <dependencies>
+            <group targetFramework="net7.0" />
+        </dependencies>
         <!-- Optional elements -->
         <!-- ... -->
     </metadata>

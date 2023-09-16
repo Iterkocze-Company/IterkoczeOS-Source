@@ -2,6 +2,15 @@
   "version": 3,
   "targets": {
     "net7.0": {
+      "Iterkocze.LibiterkoczeOS/1.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/net7.0/cs-wrapper.dll": {}
+        },
+        "runtime": {
+          "lib/net7.0/cs-wrapper.dll": {}
+        }
+      },
       "System.CommandLine/2.0.0-beta4.22272.1": {
         "type": "package",
         "compile": {
@@ -59,6 +68,45 @@
     }
   },
   "libraries": {
+    "Iterkocze.LibiterkoczeOS/1.0.1": {
+      "sha512": "ceHpccG4nyjLUhSwKFjYC8NeFKHpgtrF51JaiynHAw2R5gkgjOw6QahiDMeU9zsoDCjpB2+ur4b4wEpxctf+fw==",
+      "type": "package",
+      "path": "iterkocze.libiterkoczeos/1.0.1",
+      "files": [
+        ".nupkg.metadata",
+        "LibiterkoczeOS.cs",
+        "bin/Release/net7.0/cs-wrapper.deps.json",
+        "bin/Release/net7.0/cs-wrapper.dll",
+        "bin/Release/net7.0/cs-wrapper.pdb",
+        "cs-wrapper.csproj",
+        "cs-wrapper.sln",
+        "iterkocze.libiterkoczeos.1.0.1.nupkg.sha512",
+        "iterkocze.libiterkoczeos.nuspec",
+        "lib/net7.0/cs-wrapper.dll",
+        "make-nuget.sh",
+        "obj/Debug/net7.0/.NETCoreApp,Version=v7.0.AssemblyAttributes.cs",
+        "obj/Debug/net7.0/cs-wrapper.GlobalUsings.g.cs",
+        "obj/Debug/net7.0/cs-wrapper.assets.cache",
+        "obj/Debug/net7.0/cs-wrapper.csproj.FileListAbsolute.txt",
+        "obj/Release/net7.0/.NETCoreApp,Version=v7.0.AssemblyAttributes.cs",
+        "obj/Release/net7.0/cs-wrapper.AssemblyInfo.cs",
+        "obj/Release/net7.0/cs-wrapper.AssemblyInfoInputs.cache",
+        "obj/Release/net7.0/cs-wrapper.GeneratedMSBuildEditorConfig.editorconfig",
+        "obj/Release/net7.0/cs-wrapper.GlobalUsings.g.cs",
+        "obj/Release/net7.0/cs-wrapper.assets.cache",
+        "obj/Release/net7.0/cs-wrapper.csproj.CoreCompileInputs.cache",
+        "obj/Release/net7.0/cs-wrapper.csproj.FileListAbsolute.txt",
+        "obj/Release/net7.0/cs-wrapper.dll",
+        "obj/Release/net7.0/cs-wrapper.pdb",
+        "obj/Release/net7.0/ref/cs-wrapper.dll",
+        "obj/Release/net7.0/refint/cs-wrapper.dll",
+        "obj/cs-wrapper.csproj.nuget.dgspec.json",
+        "obj/cs-wrapper.csproj.nuget.g.props",
+        "obj/cs-wrapper.csproj.nuget.g.targets",
+        "obj/project.assets.json",
+        "obj/project.nuget.cache"
+      ]
+    },
     "System.CommandLine/2.0.0-beta4.22272.1": {
       "sha512": "1uqED/q2H0kKoLJ4+hI2iPSBSEdTuhfCYADeJrAqERmiGQ2NNacYKRNEQ+gFbU4glgVyK8rxI+ZOe1onEtr/Pg==",
       "type": "package",
@@ -106,6 +154,7 @@
   },
   "projectFileDependencyGroups": {
     "net7.0": [
+      "Iterkocze.LibiterkoczeOS >= 1.0.1",
       "System.CommandLine >= 2.0.0-beta4.22272.1"
     ]
   },
@@ -146,6 +195,10 @@
       "net7.0": {
         "targetAlias": "net7.0",
         "dependencies": {
+          "Iterkocze.LibiterkoczeOS": {
+            "target": "Package",
+            "version": "[1.0.1, )"
+          },
           "System.CommandLine": {
             "target": "Package",
             "version": "[2.0.0-beta4.22272.1, )"

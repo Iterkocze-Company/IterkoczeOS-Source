@@ -1,4 +1,0 @@
-/sources/core/libiterkoczeos/cs-wrapper/Test/obj/Debug/net7.0/Test.GeneratedMSBuildEditorConfig.editorconfig
-/sources/core/libiterkoczeos/cs-wrapper/Test/obj/Debug/net7.0/Test.AssemblyInfoInputs.cache
-/sources/core/libiterkoczeos/cs-wrapper/Test/obj/Debug/net7.0/Test.AssemblyInfo.cs
-/sources/core/libiterkoczeos/cs-wrapper/Test/obj/Debug/net7.0/Test.csproj.CoreCompileInputs.cache

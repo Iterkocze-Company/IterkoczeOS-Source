@@ -133,7 +133,7 @@ class Formula {
 
         Log.Info($"Executing BEGIN INSTALL for {Name}...");
 
-        RunProcess(InstallProcedure);
+        _RunProcess(InstallProcedure);
 
         List<string> AllFilesAfter = Directory.GetFiles("/usr/local", "*.*", SearchOption.AllDirectories).ToList();
         AllFilesAfter.AddRange(Directory.GetFiles("/programs", "*.*", SearchOption.AllDirectories).ToList());
@@ -156,7 +156,23 @@ class Formula {
         LocalDatabase.WriteDBFile(Name, "size.db", new string[]{installedSizeMB.ToString()}, false);
     }
 
-    private void RunProcess(string procedure) {
+    public List<Formula> ResolveDependencies() {
+        List<Formula> dependencies = new();
+        _ResolveDependenciesRecursive(this, dependencies);
+        return dependencies;
+    }
+
+    private void _ResolveDependenciesRecursive(Formula package, List<Formula> resolvedDependencies) {
+        if (!resolvedDependencies.Contains(package) && ToplevelPackage != null && package.Name != ToplevelPackage.Name) {
+            resolvedDependencies.Add(package);
+
+            foreach (Formula dep in package.Dependencies) {
+                _ResolveDependenciesRecursive(dep, resolvedDependencies);
+            }
+        }
+    }
+
+    private void _RunProcess(string procedure) {
         Process p = new();
         p.StartInfo.FileName = "bash";
         p.StartInfo.RedirectStandardOutput = true;
@@ -169,7 +185,7 @@ class Formula {
         p.StandardInput.WriteLine(@$"
         export CORES={Environment.ProcessorCount} 
         export LOCAL=""/usr/local""
-        export HOME=""/usr/home/NOTIMPLEMENTED_I_NEED_LIBITERKOCZEOS""
+        export HOME=""/home/{Iterkocze.LibiterkoczeOS.GetSystemUser()}""
         ");
         p.StandardInput.Write(procedure);
         p.StandardInput.Close();

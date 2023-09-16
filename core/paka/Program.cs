@@ -1,5 +1,6 @@
 ﻿using System;
 using System.CommandLine;
+using System.Runtime.CompilerServices;
 
 class Program {
     private static void ProcessExit(object? sender, EventArgs e) {
@@ -82,13 +83,9 @@ class Program {
             Environment.Exit(0);
         }
         Formula.ToplevelPackage = new(packageName);
-        List<Formula> depsToinstall = new();
+        List<Formula> depsToinstall = Formula.ToplevelPackage.ResolveDependencies();
 
         Log.Info("Calculating dependencies...");
-        foreach (Formula dep in Formula.ToplevelPackage.Dependencies) {
-            if (!dep.IsInstalled)
-                depsToinstall.Add(dep);
-        }
 
         if (depsToinstall.Count > 0) {
             Console.WriteLine("The following packages will be installed as dependencies");

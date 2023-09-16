@@ -28,3 +28,4 @@
 /sources/core/paka/bin/Debug/net7.0/zh-Hant/System.CommandLine.resources.dll
 /sources/core/paka/obj/Debug/net7.0/paka.csproj.AssemblyReference.cache
 /sources/core/paka/obj/Debug/net7.0/paka.csproj.CopyComplete
+/sources/core/paka/bin/Debug/net7.0/cs-wrapper.dll
