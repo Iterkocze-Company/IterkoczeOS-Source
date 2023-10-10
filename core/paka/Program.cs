@@ -14,8 +14,12 @@ class Program {
         };
         AppDomain.CurrentDomain.ProcessExit += ProcessExit;
         var rootCommand = new RootCommand($"Iterkocze Paka {Globals.VERSION}");
+
         var downloadOption = new Option<string>(name: "--download", description: "Installs a package");
         downloadOption.AddAlias("-D");
+
+        var cleanOption = new Option<string>(name: "--clean", description: "Safely uninstalls a package and its dependencies");
+        cleanOption.AddAlias("-C");
 
         var testOption = new Option<bool>(name: "--test", description: "Runs unit tests");
 
@@ -27,13 +31,14 @@ class Program {
         rootCommand.Add(testOption);
         rootCommand.Add(unlockOption);
         rootCommand.Add(debugOption);
+        rootCommand.Add(cleanOption);
 
-        if (Environment.UserName != "root") {
+        /*if (Environment.UserName != "root") {
             Log.Error("Run as root");
             Environment.Exit(1);
-        }
+        }*/
 
-        rootCommand.SetHandler((downloadOptionValue, testOptionValue, unlockOptionValue, debugOptionValue) => {
+        rootCommand.SetHandler((downloadOptionValue, testOptionValue, unlockOptionValue, debugOptionValue, cleanOptionValue) => {
             if (File.Exists(Globals.PAKA_BASEDIR + ".lock")) {
                 Log.Error("a lockfile is blocking paka execution\nIs another instance running?");
                 Environment.Exit(1);
@@ -48,13 +53,17 @@ class Program {
                 DoPackageDownload(downloadOptionValue);
             }
 
+            if (cleanOptionValue != null) {
+                DoPackageClean(cleanOptionValue);
+            }
+
             if (testOptionValue) {
                 Test.Run();
             }
             if (unlockOptionValue) {
                 DeleteLockfile();
             }
-        }, downloadOption, testOption, unlockOption, debugOption);
+        }, downloadOption, testOption, unlockOption, debugOption, cleanOption);
 
         rootCommand.Invoke(args);
         if (args.Length == 0) {
@@ -83,9 +92,8 @@ class Program {
             Environment.Exit(0);
         }
         Formula.ToplevelPackage = new(packageName);
-        List<Formula> depsToinstall = Formula.ToplevelPackage.ResolveDependencies();
-
         Log.Info("Calculating dependencies...");
+        List<Formula> depsToinstall = Formula.ToplevelPackage.ResolveDependencies();
 
         if (depsToinstall.Count > 0) {
             Console.WriteLine("The following packages will be installed as dependencies");
@@ -99,8 +107,38 @@ class Program {
                 dep.DoInstallProcedure();
             }
         }
-
+        Log.Info($"installing {Formula.ToplevelPackage.Name}...");
         Formula.ToplevelPackage.DoInstallProcedure();
+    }
+
+    private static void DoPackageClean(string packageName) {
+        if (!Formula.Exists(packageName)) {
+            Log.Error($"{packageName}.formula can't be found");
+            Environment.Exit(1);
+        }
+        if (!LocalDatabase.IsInstalled(packageName)) {
+            Log.Error($"{packageName} is not installed");
+            Environment.Exit(0);
+        }
+
+        Formula.ToplevelPackage = new(packageName);
+        Log.Info("Calculating dependencies...");
+        List<Formula> depsToRemove = Formula.ToplevelPackage.ResolveDependencies();
+
+        Console.WriteLine("The following packages will be removed");
+        Console.WriteLine("\t" + packageName);
+        foreach (Formula dep in depsToRemove) {
+            Console.WriteLine("\t" + dep.Name);
+        }
+        if (!AskToProceed("Do you want to continue?")) 
+            Environment.Exit(0);
+
+        foreach (Formula dep in depsToRemove) {
+            dep.DoRemoveProcedure();
+        }
+
+        Log.Info($"Removing {Formula.ToplevelPackage.Name}...");
+        Formula.ToplevelPackage.DoRemoveProcedure();
     }
 
     public static bool AskToProceed(string msg) {

@@ -39,6 +39,11 @@ public static class LocalDatabase {
         File.WriteAllLines(Globals.PAKA_DBDIR + "direct", new []{packageName});
     }
 
+    public static void UnmarkAsDirectlyInstalled(string packageName) {
+        var text = File.ReadAllLines(Globals.PAKA_DBDIR + "direct").Where(line => line != packageName).ToArray();
+        File.WriteAllLines(Globals.PAKA_DBDIR + "direct", text);
+    }
+
     public static void WriteDBFile(string forPackage, string dbFilename, IEnumerable<string> content, bool overwrite) {
         if (File.Exists(Globals.PAKA_DBDIR + forPackage + "/" + dbFilename) && !overwrite) 
             return;
@@ -46,7 +51,7 @@ public static class LocalDatabase {
         File.WriteAllLines(Globals.PAKA_DBDIR + forPackage + "/" + dbFilename, content);
     }
 
-    public static string[] ReadDBFile(string dbFilename) {
-        return Array.Empty<string>();
+    public static string[] ReadDBFile(string forPackage, string dbFilename) {
+        return File.ReadAllLines(Globals.PAKA_DBDIR + forPackage + "/" + dbFilename);
     }
 }

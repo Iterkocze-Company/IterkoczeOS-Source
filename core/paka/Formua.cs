@@ -109,7 +109,7 @@ class Formula {
     }
 
     public void DoInstallProcedure() {
-        Log.Info($"Resolving {Name}...");
+        Log.Info($"Resolving install procedure for {Name}...");
         Thread.Sleep(1000);
 
         Directory.CreateDirectory($"/tmp/{Name}");
@@ -156,16 +156,36 @@ class Formula {
         LocalDatabase.WriteDBFile(Name, "size.db", new string[]{installedSizeMB.ToString()}, false);
     }
 
+    public void DoRemoveProcedure() {
+        Log.Info($"Resolving remove procedure for {Name}...");
+        Thread.Sleep(1000);
+
+        if (Switches["AUTO_REMOVE"]) {
+            Log.Info($"Executing AUTO_REMOVE for {Name}...");
+            var filesToRemove = LocalDatabase.ReadDBFile(Name, "remove.db");
+            foreach (var file in filesToRemove) {
+                Console.WriteLine($"Deleting {file}...");
+                File.Delete(file);
+            }
+        } else {
+            _RunProcess(RemoveProcedure);
+        }
+        LocalDatabase.UnregisterPackage(Name);
+        if (ToplevelPackage != null && ToplevelPackage.Name == Name) {
+            LocalDatabase.UnmarkAsDirectlyInstalled(Name);
+        }
+    }
+
     public List<Formula> ResolveDependencies() {
         List<Formula> dependencies = new();
         _ResolveDependenciesRecursive(this, dependencies);
+        dependencies.RemoveAt(0);
         return dependencies;
     }
 
     private void _ResolveDependenciesRecursive(Formula package, List<Formula> resolvedDependencies) {
-        if (!resolvedDependencies.Contains(package) && ToplevelPackage != null && package.Name != ToplevelPackage.Name) {
+        if (!resolvedDependencies.Contains(package)) {
             resolvedDependencies.Add(package);
-
             foreach (Formula dep in package.Dependencies) {
                 _ResolveDependenciesRecursive(dep, resolvedDependencies);
             }
