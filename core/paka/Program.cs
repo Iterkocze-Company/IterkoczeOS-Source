@@ -27,18 +27,25 @@ class Program {
         
         var debugOption = new Option<bool>(name: "--debug", description: "Enables debug logging");
 
+        var listInstalledOption = new Option<bool>(name: "--list-installed", description: "Lists all installed packages and their size in MB");
+
+        var packFormulaOption = new Option<bool>(name: "--pack-formula", description: "Packs formula files into .tar");
+
         rootCommand.Add(downloadOption);
         rootCommand.Add(testOption);
         rootCommand.Add(unlockOption);
         rootCommand.Add(debugOption);
         rootCommand.Add(cleanOption);
+        rootCommand.Add(listInstalledOption);
+        rootCommand.Add(packFormulaOption);
 
         /*if (Environment.UserName != "root") {
             Log.Error("Run as root");
             Environment.Exit(1);
         }*/
 
-        rootCommand.SetHandler((downloadOptionValue, testOptionValue, unlockOptionValue, debugOptionValue, cleanOptionValue) => {
+        rootCommand.SetHandler((downloadOptionValue, testOptionValue,
+        unlockOptionValue, debugOptionValue, cleanOptionValue, listInstalledValue, packFormulaValue) => {
             if (File.Exists(Globals.PAKA_BASEDIR + ".lock")) {
                 Log.Error("a lockfile is blocking paka execution\nIs another instance running?");
                 Environment.Exit(1);
@@ -60,15 +67,40 @@ class Program {
             if (testOptionValue) {
                 Test.Run();
             }
+            if (listInstalledValue) {
+                ListInstalledPackages();
+            }
+            if (packFormulaValue) {
+                PackFormulaFiles();
+            }
             if (unlockOptionValue) {
                 DeleteLockfile();
             }
-        }, downloadOption, testOption, unlockOption, debugOption, cleanOption);
+        }, downloadOption, testOption, unlockOption, debugOption, cleanOption, listInstalledOption, packFormulaOption);
 
         rootCommand.Invoke(args);
         if (args.Length == 0) {
             Console.WriteLine($"Iterkocze Paka {Globals.VERSION}");
             Console.WriteLine("--h or --help for list of switches");
+        }
+    }
+
+    private static void PackFormulaFiles() {
+        Log.Info("Packaging all formula files...");
+        Directory.SetCurrentDirectory(Globals.PAKA_BASEDIR);
+        var p = System.Diagnostics.Process.Start("tar", "cf formula.tar formula");
+        p.WaitForExit();
+        if (p.ExitCode != 0) {
+            Log.Error("tar exited with non-zero exit code");
+        } else {
+            Log.Info("tar archive created");
+        }
+    }
+
+    private static void ListInstalledPackages() {
+        foreach(var package in LocalDatabase.GetAllInstalledPackages()) {
+            Console.Write(package + " => ");
+            Console.Write(LocalDatabase.ReadDBFile(package, "size.db")[0] + " MB\n");
         }
     }
 

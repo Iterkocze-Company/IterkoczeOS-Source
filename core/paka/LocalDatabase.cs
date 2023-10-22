@@ -54,4 +54,15 @@ public static class LocalDatabase {
     public static string[] ReadDBFile(string forPackage, string dbFilename) {
         return File.ReadAllLines(Globals.PAKA_DBDIR + forPackage + "/" + dbFilename);
     }
+
+    public static string[] GetAllInstalledPackages() {
+        var dirs = Directory.GetDirectories(Globals.PAKA_DBDIR);
+        List<string> ret = new();
+        foreach (var dir in dirs) {
+            var parts = dir.Split('/');
+            ret.Add(parts[parts.Length - 1]);
+        }
+
+        return ret.ToArray();
+    }
 }
