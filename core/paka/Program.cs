@@ -31,6 +31,8 @@ class Program {
 
         var packFormulaOption = new Option<bool>(name: "--pack-formula", description: "Packs formula files into .tar");
 
+        var findFormulaOption = new Option<string>(name: "--find", description: "Finds a formula file for specified package");
+
         rootCommand.Add(downloadOption);
         rootCommand.Add(testOption);
         rootCommand.Add(unlockOption);
@@ -38,6 +40,7 @@ class Program {
         rootCommand.Add(cleanOption);
         rootCommand.Add(listInstalledOption);
         rootCommand.Add(packFormulaOption);
+        rootCommand.Add(findFormulaOption);
 
         /*if (Environment.UserName != "root") {
             Log.Error("Run as root");
@@ -45,7 +48,8 @@ class Program {
         }*/
 
         rootCommand.SetHandler((downloadOptionValue, testOptionValue,
-        unlockOptionValue, debugOptionValue, cleanOptionValue, listInstalledValue, packFormulaValue) => {
+        unlockOptionValue, debugOptionValue, cleanOptionValue,
+        listInstalledValue, packFormulaValue, findFormulaValue) => {
             if (File.Exists(Globals.PAKA_BASEDIR + ".lock")) {
                 Log.Error("a lockfile is blocking paka execution\nIs another instance running?");
                 Environment.Exit(1);
@@ -76,12 +80,29 @@ class Program {
             if (unlockOptionValue) {
                 DeleteLockfile();
             }
-        }, downloadOption, testOption, unlockOption, debugOption, cleanOption, listInstalledOption, packFormulaOption);
+            if (findFormulaValue != null) {
+                FindFormula(findFormulaValue);
+            }
+        }, downloadOption, testOption, unlockOption, debugOption,
+        cleanOption, listInstalledOption, packFormulaOption, findFormulaOption);
 
         rootCommand.Invoke(args);
         if (args.Length == 0) {
             Console.WriteLine($"Iterkocze Paka {Globals.VERSION}");
             Console.WriteLine("--h or --help for list of switches");
+        }
+    }
+
+    private static void FindFormula(string name) {
+        Log.Info($"Searching for {name}...");
+        var files = Directory.GetFiles(Globals.PAKA_FORMULADIR);
+        List<string> ret = new();
+        foreach (var dir in files) {
+            if (dir.Contains(name)) {
+                Log.Success("Found a match");
+                var parts = dir.Split('/');
+                Console.WriteLine(parts[parts.Length - 1]);
+            }
         }
     }
 
