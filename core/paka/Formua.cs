@@ -125,6 +125,10 @@ class Formula {
             wget.StartInfo.Arguments = Properties["SRC_URL"] + " -q --show-progress";
             wget.Start();
             wget.WaitForExit();
+            if (wget.ExitCode != 0) {
+                Log.Error($"wget failed! Is SRC_URL for {Name}.formula valid?");
+                Environment.Exit(1);
+            }
         }
 
         List<string> AllFilesBefore = Directory.GetFiles("/usr/local", "*.*", SearchOption.AllDirectories).ToList();
@@ -181,6 +185,33 @@ class Formula {
         _ResolveDependenciesRecursive(this, dependencies);
         dependencies.RemoveAt(0);
         return dependencies;
+    }
+
+    public static void ValidateAll() {
+        string[] allFormulaFiles = Directory.GetFiles(Globals.PAKA_FORMULADIR);
+        List<string> names = new();
+        foreach (var file in allFormulaFiles) {
+            if (file.EndsWith("example.formula"))
+                continue;
+            var parts = file.Split('/');
+            names.Add(parts[parts.Length - 1]);
+        }
+        List<Formula> formulas = new();
+        foreach (var name in names) {
+            formulas.Add(new(name.Replace(".formula", "")));
+        }
+        foreach (var formula in formulas) {
+            formula.Validate();
+        }
+    }
+
+    public void Validate() {
+        if (string.IsNullOrEmpty(InstallProcedure)) {
+            Log.Error($"{Name} does not contain the INSTALL procedure");
+        }
+        if (Switches["HOLD"]) {
+            Log.Warning($"{Name} has HOLD enabled");
+        } 
     }
 
     private void _ResolveDependenciesRecursive(Formula package, List<Formula> resolvedDependencies) {

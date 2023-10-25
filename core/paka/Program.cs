@@ -14,6 +14,7 @@ class Program {
         };
         AppDomain.CurrentDomain.ProcessExit += ProcessExit;
         var rootCommand = new RootCommand($"Iterkocze Paka {Globals.VERSION}");
+        var utilCommand = new Command("util");
 
         var downloadOption = new Option<string>(name: "--download", description: "Installs a package");
         downloadOption.AddAlias("-D");
@@ -33,23 +34,36 @@ class Program {
 
         var findFormulaOption = new Option<string>(name: "--find", description: "Finds a formula file for specified package");
 
+        var validateFormulaOption = new Option<bool>(name: "--validate-formula-files", description: "Validates all formula files");
+
         rootCommand.Add(downloadOption);
-        rootCommand.Add(testOption);
+        //rootCommand.Add(testOption); // unused
         rootCommand.Add(unlockOption);
         rootCommand.Add(debugOption);
         rootCommand.Add(cleanOption);
         rootCommand.Add(listInstalledOption);
         rootCommand.Add(packFormulaOption);
         rootCommand.Add(findFormulaOption);
+        rootCommand.Add(validateFormulaOption);
+
+        rootCommand.AddCommand(utilCommand);
+
+        utilCommand.Add(testOption);
 
         /*if (Environment.UserName != "root") {
             Log.Error("Run as root");
             Environment.Exit(1);
         }*/
+        
+        utilCommand.SetHandler((testOptionValue => {
+            if (testOptionValue) {
+                Test.Run();
+            }
+        }), testOption);
 
-        rootCommand.SetHandler((downloadOptionValue, testOptionValue,
+        rootCommand.SetHandler((downloadOptionValue,
         unlockOptionValue, debugOptionValue, cleanOptionValue,
-        listInstalledValue, packFormulaValue, findFormulaValue) => {
+        listInstalledValue, packFormulaValue, findFormulaValue, validateFormulaValue) => {
             if (File.Exists(Globals.PAKA_BASEDIR + ".lock")) {
                 Log.Error("a lockfile is blocking paka execution\nIs another instance running?");
                 Environment.Exit(1);
@@ -67,10 +81,6 @@ class Program {
             if (cleanOptionValue != null) {
                 DoPackageClean(cleanOptionValue);
             }
-
-            if (testOptionValue) {
-                Test.Run();
-            }
             if (listInstalledValue) {
                 ListInstalledPackages();
             }
@@ -80,11 +90,14 @@ class Program {
             if (unlockOptionValue) {
                 DeleteLockfile();
             }
+            if (validateFormulaValue) {
+                Formula.ValidateAll();
+            }
             if (findFormulaValue != null) {
                 FindFormula(findFormulaValue);
             }
-        }, downloadOption, testOption, unlockOption, debugOption,
-        cleanOption, listInstalledOption, packFormulaOption, findFormulaOption);
+        }, downloadOption, unlockOption, debugOption,
+        cleanOption, listInstalledOption, packFormulaOption, findFormulaOption, validateFormulaOption);
 
         rootCommand.Invoke(args);
         if (args.Length == 0) {

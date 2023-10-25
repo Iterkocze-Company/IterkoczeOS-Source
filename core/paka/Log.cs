@@ -17,6 +17,12 @@ public static class Log {
         Console.WriteLine("[SUCCESS] " + msg);
         Console.ForegroundColor = oldColor;
     }
+    public static void Warning(string msg) {
+        ConsoleColor oldColor = Console.ForegroundColor;
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("[WARNING] " + msg);
+        Console.ForegroundColor = oldColor;
+    }
 
     /// <summary>
     /// Will output only if Globals.IsDebugMode is set
