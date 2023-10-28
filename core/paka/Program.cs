@@ -1,6 +1,5 @@
 ﻿using System;
 using System.CommandLine;
-using System.Runtime.CompilerServices;
 
 class Program {
     private static void ProcessExit(object? sender, EventArgs e) {
@@ -15,6 +14,7 @@ class Program {
         AppDomain.CurrentDomain.ProcessExit += ProcessExit;
         var rootCommand = new RootCommand($"Iterkocze Paka {Globals.VERSION}");
         var utilCommand = new Command("util");
+        var packageCommand = new Command("package");
 
         var downloadOption = new Option<string>(name: "--download", description: "Installs a package");
         downloadOption.AddAlias("-D");
@@ -36,34 +36,25 @@ class Program {
 
         var validateFormulaOption = new Option<bool>(name: "--validate-formula-files", description: "Validates all formula files");
 
-        rootCommand.Add(downloadOption);
-        //rootCommand.Add(testOption); // unused
-        rootCommand.Add(unlockOption);
-        rootCommand.Add(debugOption);
-        rootCommand.Add(cleanOption);
-        rootCommand.Add(listInstalledOption);
-        rootCommand.Add(packFormulaOption);
-        rootCommand.Add(findFormulaOption);
-        rootCommand.Add(validateFormulaOption);
+        var updatePakaOption = new Option<bool>(name: "--update-paka", description: "Updates paka");
 
-        rootCommand.AddCommand(utilCommand);
+        rootCommand.Add(unlockOption);
+        rootCommand.AddGlobalOption(debugOption); // this doesnt work
 
         utilCommand.Add(testOption);
+        utilCommand.Add(packFormulaOption);
+        utilCommand.Add(validateFormulaOption);
+        utilCommand.Add(updatePakaOption);
 
-        /*if (Environment.UserName != "root") {
-            Log.Error("Run as root");
-            Environment.Exit(1);
-        }*/
-        
-        utilCommand.SetHandler((testOptionValue => {
-            if (testOptionValue) {
-                Test.Run();
-            }
-        }), testOption);
+        packageCommand.Add(downloadOption);
+        packageCommand.Add(cleanOption);
+        packageCommand.Add(listInstalledOption);
+        packageCommand.Add(findFormulaOption);
 
-        rootCommand.SetHandler((downloadOptionValue,
-        unlockOptionValue, debugOptionValue, cleanOptionValue,
-        listInstalledValue, packFormulaValue, findFormulaValue, validateFormulaValue) => {
+        rootCommand.AddCommand(utilCommand);
+        rootCommand.AddCommand(packageCommand);
+
+        rootCommand.SetHandler((unlockOptionValue, debugOptionValue) => {
             if (File.Exists(Globals.PAKA_BASEDIR + ".lock")) {
                 Log.Error("a lockfile is blocking paka execution\nIs another instance running?");
                 Environment.Exit(1);
@@ -73,31 +64,41 @@ class Program {
             if (debugOptionValue) {
                 Globals.IsDebugMode = true;
             }
+            if (unlockOptionValue) {
+                DeleteLockfile();
+            }
+        }, unlockOption, debugOption);
 
+        utilCommand.SetHandler((testOptionValue, packFormulaValue, validateFormulaValue, updatePakaValue) => {
+            if (testOptionValue) {
+                Test.Run();
+            }
+            if (packFormulaValue) {
+                PackFormulaFiles();
+            }
+            if (validateFormulaValue) {
+                Formula.ValidateAll();
+            }
+            if (updatePakaValue) {
+                UpdatePaka();
+            }
+        }, testOption, packFormulaOption, validateFormulaOption, updatePakaOption);
+
+        packageCommand.SetHandler((downloadOptionValue, cleanOptionValue, listInstalledValue, findFormulaValue) => {
             if (downloadOptionValue != null) {
                 DoPackageDownload(downloadOptionValue);
             }
-
             if (cleanOptionValue != null) {
                 DoPackageClean(cleanOptionValue);
             }
             if (listInstalledValue) {
                 ListInstalledPackages();
             }
-            if (packFormulaValue) {
-                PackFormulaFiles();
-            }
-            if (unlockOptionValue) {
-                DeleteLockfile();
-            }
-            if (validateFormulaValue) {
-                Formula.ValidateAll();
-            }
             if (findFormulaValue != null) {
                 FindFormula(findFormulaValue);
             }
-        }, downloadOption, unlockOption, debugOption,
-        cleanOption, listInstalledOption, packFormulaOption, findFormulaOption, validateFormulaOption);
+        }, downloadOption, cleanOption, listInstalledOption, findFormulaOption);
+
 
         rootCommand.Invoke(args);
         if (args.Length == 0) {
@@ -106,17 +107,23 @@ class Program {
         }
     }
 
+    private static void UpdatePaka() {
+        System.Console.WriteLine("Not implemnted");
+    }
+
     private static void FindFormula(string name) {
         Log.Info($"Searching for {name}...");
         var files = Directory.GetFiles(Globals.PAKA_FORMULADIR);
         List<string> ret = new();
+        int hits = 0;
         foreach (var dir in files) {
             if (dir.Contains(name)) {
-                Log.Success("Found a match");
                 var parts = dir.Split('/');
                 Console.WriteLine(parts[parts.Length - 1]);
+                hits++;
             }
         }
+        Log.Success($"Found {hits} matches");
     }
 
     private static void PackFormulaFiles() {
@@ -159,10 +166,11 @@ class Program {
         }
         Formula.ToplevelPackage = new(packageName);
         Log.Info("Calculating dependencies...");
-        List<Formula> depsToinstall = Formula.ToplevelPackage.ResolveDependencies();
+        List<Formula> depsToinstall = Formula.ToplevelPackage.ResolveDependencies().Where(dep => !LocalDatabase.IsInstalled(dep.Name)).ToList();
 
         if (depsToinstall.Count > 0) {
-            Console.WriteLine("The following packages will be installed as dependencies");
+            Console.WriteLine("The following packages will be installed");
+            Console.WriteLine("\t" + Formula.ToplevelPackage.Name);
             foreach (Formula dep in depsToinstall) {
                 Console.WriteLine("\t" + dep.Name);
             }

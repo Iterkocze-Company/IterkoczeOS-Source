@@ -36,16 +36,11 @@ const char* GetSystemVersion() {
             // by the gods
             static char pls[3];
             pls[0] = line[9];
-            pls[1] = line[10];
-            pls[2] = line[11];
+            //pls[1] = line[9];
+            //pls[2] = line[10];
             return pls;
         }
     }
 
     return "VERSION ERROR";
-}
-
-bool IsVM() {
-    printf("IsVM() IS NOT IMPLEMENTED");
-    return false;
 }

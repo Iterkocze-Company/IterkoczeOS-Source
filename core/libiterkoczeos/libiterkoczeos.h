@@ -5,6 +5,5 @@
 
 const char* GetSystemUser();
 const char* GetSystemVersion();
-bool IsVM();
 
 #endif

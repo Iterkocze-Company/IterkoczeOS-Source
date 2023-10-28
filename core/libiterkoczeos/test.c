@@ -8,7 +8,5 @@ int main() {
     printf("OS Version: ");
     printf(GetSystemVersion());
     printf("\n");
-    printf("%d", IsVM());
-    printf("\n");
     return 0;
 } 

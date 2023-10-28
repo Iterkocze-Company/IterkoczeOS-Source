@@ -211,7 +211,7 @@ class Formula {
         }
         if (Switches["HOLD"]) {
             Log.Warning($"{Name} has HOLD enabled");
-        } 
+        }
     }
 
     private void _ResolveDependenciesRecursive(Formula package, List<Formula> resolvedDependencies) {

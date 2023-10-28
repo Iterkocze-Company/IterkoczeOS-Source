@@ -110,7 +110,7 @@ void open_activate(GtkMenuItem* item, gpointer data) {
         GTK_RESPONSE_CANCEL,
         "Open",
         GTK_RESPONSE_ACCEPT,
-        NULL
+        NULL 
     );
 
     res = gtk_dialog_run(GTK_DIALOG(dialog));
