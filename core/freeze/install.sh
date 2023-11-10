@@ -1,0 +1,1 @@
+doas cp -v ./freeze /bin/freeze

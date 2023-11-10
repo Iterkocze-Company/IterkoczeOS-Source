@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>test</id>
+    <version>1.0.0</version>
+    <authors>test</authors>
+    <description>Package Description</description>
+    <dependencies>
+      <group targetFramework="net7.0">
+        <dependency id="cs-wrapper" version="1.0.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="/sources/core/libiterkoczeos/cs-test/bin/Release/net7.0/test.runtimeconfig.json" target="lib/net7.0/test.runtimeconfig.json" />
+    <file src="/sources/core/libiterkoczeos/cs-test/bin/Release/net7.0/test.dll" target="lib/net7.0/test.dll" />
+  </files>
+</package>

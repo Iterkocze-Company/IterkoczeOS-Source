@@ -1,0 +1,1 @@
+doas cp -v ./locale-clean /bin/locale-clean
