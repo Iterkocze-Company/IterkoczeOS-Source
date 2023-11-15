@@ -32,6 +32,9 @@ class Program {
         var cleanOption = new Option<string>(name: "--clean", description: "Safely uninstalls a package and its dependencies");
         cleanOption.AddAlias("-C");
 
+        var uninstallOption = new Option<string>(name: "--uninstall", description: "Uninstalls only the package specified and leaves any dependencies");
+        uninstallOption.AddAlias("-U");
+
         var testOption = new Option<bool>(name: "--test", description: "Runs unit tests");
 
         var unlockOption = new Option<bool>(name: "--force-unlock", description: "Deletes the lockfile (unsafe)");
@@ -58,6 +61,7 @@ class Program {
 
         packageCommand.Add(downloadOption);
         packageCommand.Add(cleanOption);
+        packageCommand.Add(uninstallOption);
         packageCommand.Add(listInstalledOption);
         packageCommand.Add(findFormulaOption);
 
@@ -94,7 +98,7 @@ class Program {
             }
         }, testOption, packFormulaOption, validateFormulaOption, updatePakaOption);
 
-        packageCommand.SetHandler((downloadOptionValue, cleanOptionValue, listInstalledValue, findFormulaValue) => {
+        packageCommand.SetHandler((downloadOptionValue, cleanOptionValue, listInstalledValue, findFormulaValue, uninstallOptionValue) => {
             if (downloadOptionValue != null) {
                 DoPackageDownload(downloadOptionValue);
             }
@@ -107,7 +111,10 @@ class Program {
             if (findFormulaValue != null) {
                 FindFormula(findFormulaValue);
             }
-        }, downloadOption, cleanOption, listInstalledOption, findFormulaOption);
+            if (uninstallOptionValue != null) {
+                DoPackageUninstall(uninstallOptionValue);
+            }
+        }, downloadOption, cleanOption, listInstalledOption, findFormulaOption, uninstallOption);
 
 
         rootCommand.Invoke(args);
@@ -165,14 +172,33 @@ class Program {
         }
     }
 
+    private static void DoPackageUninstall(string packageName) {
+        if (!Formula.Exists(packageName)) {
+            Log.Error($"{packageName}.formula can't be found");
+            Environment.Exit(1);
+        }
+        if (!LocalDatabase.IsInstalled(packageName)) {
+            Log.Error($"{packageName} is not installed");
+            Environment.Exit(1);
+        }
+
+        if (!AskToProceed($"To uninstall a package and it's dependencies use -C\nThis action will uninstall {packageName}, but leave any dependencies. Do you want to preceed?")) {
+            Environment.Exit(0);
+        }
+
+        Formula packageToUninstall = new(packageName);
+        packageToUninstall.DoRemoveProcedure();
+    }
+
     private static void DoPackageDownload(string packageName) {
         if (!Formula.Exists(packageName)) {
             Log.Error($"{packageName}.formula can't be found");
             Environment.Exit(1);
         }
         if (LocalDatabase.IsInstalled(packageName)) {
-            Log.Error($"{packageName} is already installd. To reinstall, please uninstall it first");
-            Environment.Exit(0);
+            if (!AskToProceed($"{packageName} is already installed. Are you sure you want to reinstall?")) {
+                Environment.Exit(0);
+            }
         }
         Formula.ToplevelPackage = new(packageName);
         Log.Info("Calculating dependencies...");
@@ -190,6 +216,8 @@ class Program {
             foreach (Formula dep in depsToinstall) {
                 dep.DoInstallProcedure();
             }
+        } else {
+            Log.Success("All dependencies satisfied");
         }
         Log.Info($"installing {Formula.ToplevelPackage.Name}...");
         Formula.ToplevelPackage.DoInstallProcedure();

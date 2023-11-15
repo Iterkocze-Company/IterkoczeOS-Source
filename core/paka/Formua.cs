@@ -241,7 +241,7 @@ class Formula {
         p.StandardInput.WriteLine(@$"
         export CORES={Environment.ProcessorCount} 
         export LOCAL=""/usr/local/""
-        export USER_HOME=""/home/{Iterkocze.LibiterkoczeOS.GetSystemUser()}/""
+        export USER_HOME=""/home/{Iterkocze.LibiterkoczeOS.GetSystemUser()}""
         ");
         p.StandardInput.Write(procedure);
         p.StandardInput.Close();
