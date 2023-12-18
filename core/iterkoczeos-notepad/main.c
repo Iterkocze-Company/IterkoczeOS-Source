@@ -134,11 +134,11 @@ void open_activate(GtkMenuItem* item, gpointer data) {
 int main(int argc, char* argv[]) {
     gtk_init(&argc, &argv);
     GtkBuilder* builder = gtk_builder_new();
-    gtk_builder_add_from_file(builder, "/var/ui/iterkocze-notepad.glade", NULL);
+    gtk_builder_add_from_file(builder, "/var/ui/iterkoczeos-notepad.glade", NULL);
 
     tv = GTK_TEXT_VIEW(gtk_builder_get_object(builder, "textView"));
     GtkWidget* window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
-    gtk_window_set_title(window, "Iterkocze Notepad");
+    gtk_window_set_title(window, "IterkoczeOS Notepad");
 
     if (argc > 1) {
         tv_set_text_from_file(argv[1]);

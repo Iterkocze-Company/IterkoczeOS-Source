@@ -65,6 +65,11 @@
           },
           "runtimeIdentifierGraphPath": "/programs/local/dotnet7-sdk/sdk/7.0.403/RuntimeIdentifierGraph.json"
         }
+      },
+      "runtimes": {
+        "linux-x64": {
+          "#import": []
+        }
       }
     }
   }

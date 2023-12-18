@@ -1,0 +1,18 @@
+NAME="git"
+DESC="The git source control system"
+SRC_URL="https://www.kernel.org/pub/software/scm/git/git-2.41.0.tar.xz"
+DEPENDSON=""
+
+BEGIN INSTALL
+	tar xf git-2.41.0.tar.xz
+	cd git-2.41.0
+
+	./configure --prefix=/usr/local \
+            --with-gitconfig=/etc/gitconfig \
+            --with-python=python3 &&
+	make -j$CORES
+	make perllibdir=/usr/lib/perl5/5.36/site_perl install
+END INSTALL
+
+BEGIN REMOVE
+END REMOVE

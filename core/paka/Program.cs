@@ -196,9 +196,8 @@ class Program {
             Environment.Exit(1);
         }
         if (LocalDatabase.IsInstalled(packageName)) {
-            if (!AskToProceed($"{packageName} is already installed. Are you sure you want to reinstall?")) {
-                Environment.Exit(0);
-            }
+            Console.WriteLine($"{packageName} is already installed. If you want to update or reinstall this package, uninstall it first.\nIt's best to do a full removal of the package using -C");
+            Environment.Exit(0);
         }
         Formula.ToplevelPackage = new(packageName);
         Log.Info("Calculating dependencies...");

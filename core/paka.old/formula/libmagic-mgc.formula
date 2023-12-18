@@ -1,0 +1,14 @@
+NAME="libmagic-mgc"
+DESC="Libmagic-mgc for libmagic (Obsolete)"
+SRC_URL="http://ftp.de.debian.org/debian/pool/main/f/file/libmagic-mgc_5.39-3_amd64.deb"
+DEPENDSON=""
+OBSOLETE
+
+BEGIN INSTALL
+	cd usr/lib/
+	mv -v file/magic.mgc /usr/local/lib/
+END INSTALL
+
+BEGIN REMOVE
+	rm -v /usr/local/lib/magic.mgc
+END REMOVE

@@ -1,0 +1,26 @@
+NAME="sgml-common"
+DESC=""
+SRC_URL="https://sourceware.org/ftp/docbook-tools/new-trials/SOURCES/sgml-common-0.6.3.tgz"
+DEPENDSON=""
+
+BEGIN INSTALL
+	wget https://www.linuxfromscratch.org/patches/blfs/svn/sgml-common-0.6.3-manpage-1.patch
+	tar xf sgml-common-0.6.3.tgz
+	cd sgml-common-0.6.3
+
+	patch -Np1 -i ../sgml-common-0.6.3-manpage-1.patch &&
+	autoreconf -f -i	
+
+	./configure --prefix=/usr/local --sysconfdir=/etc &&
+	make -j$CORES
+	make docdir=/usr/share/doc install &&
+
+install-catalog --add /etc/sgml/sgml-ent.cat \
+    /usr/share/sgml/sgml-iso-entities-8879.1986/catalog &&
+
+install-catalog --add /etc/sgml/sgml-docbook.cat \
+    /etc/sgml/sgml-ent.cat
+END INSTALL
+
+BEGIN REMOVE
+END REMOVE

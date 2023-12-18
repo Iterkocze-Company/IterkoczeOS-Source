@@ -1,0 +1,19 @@
+NAME="cpio"
+DESC="The"
+SRC_URL="https://ftp.gnu.org/gnu/cpio/cpio-2.14.tar.bz2"
+DEPENDSON=""
+
+BEGIN INSTALL
+	tar xf cpio-2.14.tar.bz2
+	cd cpio-2.14
+	./configure --prefix=/usr/local \
+            --enable-mt   \
+            --with-rmt=/usr/libexec/rmt
+make -j$CORES
+make install
+END INSTALL
+
+BEGIN REMOVE
+	rm -v $LOCAL/bin/cpio
+	rm -v $LOCAL/bin/mt
+END REMOVE

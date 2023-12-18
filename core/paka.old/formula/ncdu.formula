@@ -1,0 +1,13 @@
+NAME="ncdu"
+DESC="A disk usage analyzer with an ncurses interface"
+SRC_URL="https://dev.yorhel.nl/download/ncdu-2.2.1-linux-x86_64.tar.gz"
+DEPENDSON=""
+
+BEGIN INSTALL
+	tar xf ncdu-2.2.1-linux-x86_64.tar.gz
+	mv -v ncdu $LOCAL/bin
+END INSTALL
+
+BEGIN REMOVE
+	rm -v $LOCAL/bin/ncdu
+END REMOVE

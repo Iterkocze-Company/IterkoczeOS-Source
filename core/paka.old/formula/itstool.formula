@@ -1,0 +1,16 @@
+NAME="itstool"
+DESC=""
+SRC_URL="https://files.itstool.org/itstool/itstool-2.0.7.tar.bz2"
+DEPENDSON="docbook-xml"
+
+BEGIN INSTALL
+	tar xf itstool-2.0.7.tar.bz2
+	cd itstool-2.0.7
+
+	PYTHON=/usr/bin/python3 ./configure --prefix=/usr/local &&
+	make -j$CORES
+	make install
+END INSTALL
+
+BEGIN REMOVE
+END REMOVE

@@ -1,0 +1,22 @@
+NAME="qtcreator"
+DESC=""
+SRC_URL="http://ftp.de.debian.org/debian/pool/main/q/qtcreator/qtcreator_4.8.2-1_amd64.deb"
+DEPENDSON="libbotan"
+AUTO_REMOVE
+
+BEGIN INSTALL
+	7z x qtcreator_4.8.2-1_amd64.deb
+	tar xf data.tar
+
+	wget http://ftp.de.debian.org/debian/pool/main/q/qtcreator/qtcreator-data_4.8.2-1_all.deb
+	rm data.tar
+	7z x qtcreator-data_4.8.2-1_all.deb
+	tar xf data.tar
+	cp -r usr/share/qtcreator /usr/local/share	
+
+	cp -r usr/lib/x86_64-linux-gnu /usr/local/lib/	
+	cp usr/bin/qtcreator /usr/local/bin/
+END INSTALL
+
+BEGIN REMOVE
+END REMOVE

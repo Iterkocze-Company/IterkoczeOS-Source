@@ -1,0 +1,520 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+#
+#  paka
+#  
+#  Copyright 2023 Iterkocze Company
+#  
+#  This program is free software; you can('t) redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any lator version.
+#  
+#  This program is distributed in hope.
+#  
+#  You should have received a copy of the GNU General Public License. feet
+
+# 2.0 = Added procedures
+
+# 2.1 = forgot
+
+# 2.2 = forgot
+
+# 2.3 = Paka can now (hopefuly) uninstall nested dependencies if they were not installed directly by the user
+
+# 2.4 = Bugfixes and introduction of formula file switches (HOLD) and additional parameter (NAME)
+
+# 2.4.1 = Added colored output
+
+# 2.5 = (hepefuly) fixed the buggy and broken dependency resolvement for uninstalling packages
+
+# 2.6 = Added the experimental AUTO_REMOVE feature
+
+# 2.6.2 Improved package installation prompts
+
+# 2.6.3 Added sync and update feature
+
+# 2.6.4 Fixed a prompt bug in uninstallation and installation, that causes it not to show all packages that will be removed and fixed Paka not checking reverse dependencies
+
+# 2.6.5 New switches (--installed and --depends)
+
+# 2.6.6 Fixed nested dependencies display
+
+# 2.7.6 Bugfixes and formula file validation
+
+# 3.0.0 Package installation and uninstallation code was rewritten and AUTO_REMOVE bug was fixed
+
+# 3.1.0 Now paka calculates installed package size and shows it in --installed
+
+# 3.1.1 Fixed a major bug that caused the wrong SRC_URL to be selected. --installed flag now properly shows size of packages installed in /programs (this is actually such a buggy mess. Help me aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa why. why did i do it the way i did? I regret everytjing, I shou;d have known the consequences of writinh tech debt code. I made this mistake so many times. Please, forgive me)
+
+def main(args):
+    return 0
+
+import os
+import libiterkoczeos
+from time import sleep
+from typing import Dict
+
+class Formula:
+	Properties:Dict[str,str] = {}
+	Switches:Dict[str,bool] = {"HOLD":False, "AUTO_REMOVE":False}
+	Dependson = []
+	InstallCmd = ""
+	RemoveCmd = ""
+	
+	def __init__(self, name):
+		self.Dependson = get_package_dependencies(name)
+		for _line in get_formula_file(name).readlines():
+			line = _line.strip()
+			if (line.startswith("SRC_URL")): #OMG WTF :(( The toplevel package gets replaced by the last dependency SRC_URL. HOW
+				self.Properties["SRC_URL"] = line.replace("SRC_URL", "").replace("=", "", 1).replace("\"", "")
+			if (line.startswith("NAME")):
+				self.Properties["NAME"] = line.replace("NAME", "").replace("=", "", 1).replace("\"", "")
+			if (line.startswith("HOLD")):
+				self.Switches["HOLD"] = True
+			if (line.startswith("AUTO_REMOVE")):
+				self.Switches["AUTO_REMOVE"] = True
+				
+		content = get_formula_file(name).read()
+		begin_index = content.index("BEGIN INSTALL") + len("BEGIN") + 8
+		end_index = content.index("END INSTALL")
+		self.InstallCmd = content[begin_index:end_index].strip() 
+		
+		begin_index = content.index("BEGIN REMOVE") + len("BEGIN") + 8
+		end_index = content.index("END REMOVE")
+		self.RemoveCmd = content[begin_index:end_index].strip() 
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+toplevel_package = ""
+
+def is_internet_on():
+	from urllib import request
+	
+	try:
+		request.urlopen('https://gentoo.org', timeout=1)
+		return True
+	except request.URLError as err: 
+		return False
+
+def cprint(msg, color):
+	print(color + msg + bcolors.ENDC)
+
+def init_direct_file():
+	if not os.path.exists('/var/paka/direct'):
+		os.mknod('/var/paka/direct')
+
+def register_package_as_directly_installed(pkg_name):
+	with open('/var/paka/direct') as t:
+		for line in t:
+			if (line.startswith(pkg_name)):
+				return
+	
+	with open('/var/paka/direct', 'a') as f:
+		f.write(pkg_name + "\n")
+		
+def unregister_package(pkg_name):
+	with open("/var/paka/direct", "r") as f:
+		lines = f.readlines()
+	with open("/var/paka/direct", "w") as f:
+		for line in lines:
+			if line.strip("\n") != pkg_name:
+				f.write(line)
+		
+def get_directly_installed():
+	ret = []
+	with open('/var/paka/direct') as t:
+		for line in t:
+			ret.append(line.strip())
+	return ret
+	
+def get_all_installed_packages():
+	return os.listdir("/var/paka/db")
+	
+def get_all_formula_files():
+	return os.listdir("/var/paka/formula")
+	
+def is_directly_installed(pkg_name):
+	if (pkg_name in get_directly_installed()):
+		return True
+	else:
+		return False
+		
+def is_package_installed(pkg_name):
+	for ffile in os.listdir("/var/paka/db"):
+		if (ffile == pkg_name.strip()):
+			return True
+	return False
+    
+def get_config_string(formula_file:str, conf_str:str):
+	for line in get_formula_file(formula_file):
+		line = line.replace("\n","")
+		if (line.startswith(conf_str)):
+			return line.replace(conf_str, "").replace("=", "", 1).replace("\"", "")
+			
+def get_config_switch(formula_file:str, conf_str:str):
+	for line in get_formula_file(formula_file):
+		line = line.replace("\n","")
+		if (line.startswith(conf_str)):
+			return True
+	return False
+ 
+def get_formula_file(name:str):
+	try:
+		formula_file = open("/var/paka/formula/{}.formula".format(name))
+	except:
+		cprint("ERROR! formula file for {} not found!".format(name), bcolors.FAIL)
+		exit()
+	return formula_file
+	
+def get_package_desc(name:str):
+	return get_config_string(name, "DESC")
+	
+def get_package_name(pkg_name):
+	return get_config_string(pkg_name, "NAME")
+	
+def get_package_dependencies(package):
+	ret = []
+	for dep in get_config_string(package, "DEPENDSON").split(","):
+		if (dep != ''):
+			ret.append(dep)
+	return ret
+	
+def get_all_files(path):
+	ret = []
+	for path, subdirs, files in os.walk(path):
+		for name in files:
+			ret.append(os.path.join(path, name))
+	return ret
+		
+def write_db_file(package_name, file_name, content_list):
+	file_path = "/var/paka/db/{}/{}".format(package_name, file_name)
+
+	with open(file_path, "a") as f:
+		for line in content_list:
+			f.write(line + "\n")
+			
+def read_db_file(package_name, file_name):
+	lines = []
+	with open("/var/paka/db/{}/{}".format(package_name, file_name), "r") as file:
+		lines = [line.rstrip() for line in file]
+	return lines
+		
+def do_formula_file(package_name:str):
+	import multiprocessing
+	formula_data = Formula(package_name)
+	
+	if (validate_formula_file(package_name+".formula") > 0):
+		cprint(f"There are errors in {package_name}.formula. Can't continue the installation", bcolors.FAIL)
+		exit()
+
+	#resolf dependiecies
+	dependson = formula_data.Dependson
+	deps_to_install = []
+	
+	for dependency in dependson:
+		cprint("Resolving dependency {}...".format(dependency), bcolors.OKBLUE)
+		# Give the user a second to look at what's happening
+		sleep(1.0)
+		for depdep in get_package_dependencies(dependency):
+			if (not is_package_installed(depdep)):
+				deps_to_install.append(depdep)
+		if (not is_package_installed(dependency)):
+			deps_to_install.append(dependency)
+		else:
+			cprint("{} already satisfied".format(dependency), bcolors.OKGREEN)
+			sleep(1.0)
+	
+	if (len(deps_to_install) != 0):
+		cprint("The following packages will be installed.\nAre you sure you want to continue?", bcolors.OKCYAN)
+		cprint("  →{}".format(package_name), bcolors.WARNING)
+		for dep in deps_to_install:
+			cprint("  →{}".format(dep), bcolors.WARNING)
+		user_input = ""
+		while user_input != "y":
+			user_input = input("y/n? ").strip().lower()
+			if (user_input == "n"):
+				cprint("Installation aborted by user", bcolors.OKBLUE)
+				exit()
+
+
+	for to_install in deps_to_install:
+		do_formula_file(to_install)
+	
+	#src_url = formula_data.Properties["SRC_URL"]
+	src_url = get_config_string(package_name, "SRC_URL")
+	os.system(f'mkdir /tmp/{formula_data.Properties["NAME"]}')
+	os.chdir("/tmp")
+	cprint("Downloading {}...".format(package_name), bcolors.OKBLUE)
+	sleep(1.0)
+	if (os.system("wget -P /tmp/{} {}".format(formula_data.Properties["NAME"], src_url)) != 0):
+		cprint("Can't download the package. SRC_URL is not valid", bcolors.FAIL)
+		exit()
+		
+	os.environ["CORES"] = str(multiprocessing.cpu_count())
+	os.environ["LOCAL"] = str("/usr/local")
+	os.environ["USER_HOME"] = str(libiterkoczeos.GetSystemUser())
+	
+	all_files_before_install = get_all_files("/usr/local/")
+	all_files_before_install_programs = get_all_files("/programs")
+	os.chdir(f'/tmp/{formula_data.Properties["NAME"]}')
+	
+	os.system(formula_data.InstallCmd)
+
+	all_installed_files = []
+	for current_file in get_all_files("/usr/local/"):
+		if (current_file not in all_files_before_install):
+			all_installed_files.append(current_file)
+	for current_file in get_all_files("/programs"):
+		if (current_file not in all_files_before_install_programs):
+			all_installed_files.append(current_file)
+			
+	cprint("Calculating installed package size...", bcolors.OKBLUE)
+	installed_package_size_mb = 0
+	for ifile in all_installed_files:
+		installed_package_size_mb += os.path.getsize(ifile) / 1000000
+		
+	installed_package_size_mb = round(installed_package_size_mb, 2)
+	
+	os.system("mkdir /var/paka/db/{}".format(package_name))
+	write_db_file(package_name, "remove.db", all_installed_files)
+	
+	if (installed_package_size_mb != 0):
+		mb_list = [str(installed_package_size_mb)]
+		write_db_file(package_name, "size.db", mb_list)
+	
+	register_package_as_directly_installed(toplevel_package)
+	if (not formula_data.Switches["HOLD"] and os.path.exists(f'/tmp/{formula_data.Properties["NAME"]}')):
+		os.system("rm -rf /tmp/{}".format(formula_data.Properties["NAME"]))
+	cprint("Installation complete", bcolors.OKGREEN)
+
+def uninstall_package(pkg_name:str, skip_dep_check=False):
+	import multiprocessing
+	import time
+	formula_data = Formula(pkg_name)
+	
+	if (not os.path.exists("/var/paka/db/{}".format(pkg_name))):
+		cprint("{} is not installed".format(pkg_name), bcolors.WARNING)
+		exit()
+		
+	if (validate_formula_file(pkg_name+".formula") > 0):
+		cprint(f"There are errors in {pkg_name}.formula. Can't continue the removal", bcolors.FAIL)
+		exit()
+	
+	cprint("Checking {} dependencies...".format(pkg_name), bcolors.OKBLUE)
+	sleep(1.0)
+	
+	#Check for reverse deps
+	if (not skip_dep_check):
+		all_deps = []
+		for installed_pkg in get_all_installed_packages():
+			if (installed_pkg != pkg_name):
+				all_deps.append(get_package_dependencies(installed_pkg))
+		all_deps = [item for sublist in all_deps for item in sublist]
+		if (pkg_name in all_deps):
+			cprint("{} can't be removed, since other installed packages depend on it".format(pkg_name), bcolors.FAIL)
+			exit()
+	
+	dependson = formula_data.Dependson
+	packages_to_uninstall = []
+	all_deps = []
+	if (not skip_dep_check):
+		for dependency in dependson:
+			if (not is_directly_installed(dependency)):
+				for installed_pkg in get_all_installed_packages():
+					if (installed_pkg != pkg_name):
+						all_deps.append(get_package_dependencies(installed_pkg))
+				all_deps = [item for sublist in all_deps for item in sublist]
+				if (dependency not in all_deps and dependency not in packages_to_uninstall):
+					packages_to_uninstall.append(dependency)
+					for dep in get_package_dependencies(dependency):
+						packages_to_uninstall.append(dep)
+		
+	
+	if (not skip_dep_check):
+		if (len(packages_to_uninstall) == 0 and len(get_package_dependencies(pkg_name)) != 0):
+			cprint("No dependencies for {} will be removed, since all of them are required by other installed packages".format(pkg_name), bcolors.WARNING)
+		else:
+			cprint("Following packages will be removed. Are you sure you want to continue?", bcolors.OKCYAN)
+			cprint("  →{}".format(pkg_name), bcolors.WARNING)
+			for to_be_removed in packages_to_uninstall:
+				cprint("  →{}".format(to_be_removed), bcolors.WARNING)
+			user_input = ""
+			while user_input != "y":
+				user_input = input("y/n? ").strip().lower()
+				if (user_input == "n"):
+					cprint("Removal aborted by user", bcolors.OKBLUE)
+					exit()
+
+	#for i in range(3, 0, -1):
+	#	print("\033[31m{}".format(i), end="... ", flush=True)
+	#	time.sleep(1)
+	#print("0\033[0m")
+	for to_uni in packages_to_uninstall:
+		uninstall_package(to_uni, True)
+		
+	cprint("Uninstalling {}...".format(pkg_name), bcolors.OKBLUE)
+	os.environ["CORES"] = str(multiprocessing.cpu_count())
+	os.environ["LOCAL"] = str("/usr/local")
+	os.environ["USER_HOME"] = str(libiterkoczeos.GetSystemUser())
+	
+	if (formula_data.Switches["AUTO_REMOVE"]):
+		cprint("AUTO_REMOVE enabled by the formula file. Begining automatic file removal...", bcolors.WARNING)
+		for file in read_db_file(pkg_name, "remove.db"):
+			os.system("rm -v {}".format(file))
+	
+	os.system(formula_data.RemoveCmd)
+	os.system("rm -rf /var/paka/db/{}".format(pkg_name))
+	unregister_package(pkg_name)
+	cprint("Uninstallation finished", bcolors.OKGREEN)
+	
+def update_version_file():
+	#TODO: Mabe make it actually update the correct values?
+	os.system("wget -q -O /var/paka/version https://iterkoczeos.xlx.pl/storage/version")
+	
+def sync_formula_files():
+	if (not is_internet_on()):
+		cprint("Internet connection is required to perform the update", bcolors.FAIL)
+		exit()
+	cprint("Downloading formula files...", bcolors.OKBLUE)
+	os.chdir("/var/paka")
+	if (os.system("wget https://iterkoczeos.xlx.pl/storage/formula.tar.xz") != 0):
+		cprint("ERROR! Can't pull new formula files", bcolors.FAIL)
+		exit()
+	os.system("tar xvf formula.tar.xz")
+	os.system("rm formula.tar.xz")
+	update_version_file()
+	cprint("Sycnc done", bcolors.OKGREEN)
+	
+def update_paka():
+	if (not is_internet_on()):
+		cprint("Internet connection is required to perform the update", bcolors.FAIL)
+		exit()
+	cprint("Updating Iterkocze Paka...", bcolors.OKBLUE)
+	cprint("Making backup...", bcolors.OKBLUE)
+	os.system("cp -v /usr/bin/paka /var/paka/paka.backup")
+	if (os.system("wget -q -O /usr/bin/paka https://iterkoczeos.xlx.pl/storage/paka") != 0):
+		cprint("ERROR! Can't pull new version", bcolors.FAIL)
+		exit()
+	update_version_file()
+	cprint("Update done", bcolors.OKGREEN)
+				
+def show_installed_packages():
+	cprint("Searching for installed packages...", bcolors.OKBLUE)
+	i = 0
+	for pkg in get_all_installed_packages():
+		size = 0
+		try:
+			size = float(read_db_file(pkg, "size.db")[0])
+		except:
+			size = 0
+		i += 1
+		cprint(f"{pkg} ({size} MB)", bcolors.HEADER)
+		for dep in get_package_dependencies(pkg):
+			cprint("| →{}".format(dep), bcolors.WARNING)
+			for depdep in get_package_dependencies(dep):
+				cprint(" \ →{}".format(depdep), bcolors.OKBLUE)
+	cprint("Found {} packages in total".format(i), bcolors.OKGREEN)
+	
+def show_depends(dep):
+	cprint("Searching for installed packages that depend on {}...".format(dep), bcolors.OKBLUE)
+	for pkg in get_all_installed_packages():
+		if (dep in get_package_dependencies(pkg)):
+			cprint("{} {}".format(pkg, get_package_dependencies(pkg)), bcolors.OKCYAN)
+	
+def validate_formula_file(formula_file):
+	found_errors = 0
+	required_keywords = ["NAME", "DESC", "SRC_URL", "DEPENDSON", "BEGIN INSTALL", "BEGIN REMOVE", "END INSTALL", "END REMOVE"]
+	danger_keywords = ["HOLD", "AUTO_REMOVE"]
+	os.chdir("/var/paka/formula")
+	with open(formula_file, 'r') as file:
+		content = file.read()
+		for rk in required_keywords:
+			if (rk not in content):
+				cprint(f"{formula_file} has no {rk}", bcolors.FAIL)
+				found_errors += 1
+		for dk in danger_keywords:
+			if (dk in content):
+				cprint(f"{formula_file} has {dk}", bcolors.WARNING)
+		if ("OBSOLETE" in content):
+			cprint(f"{formula_file} is obsolete", bcolors.FAIL)
+			found_errors += 1
+	return found_errors
+	
+def validate_all_formula_files():
+	for ffile in os.listdir("/var/paka/formula"):
+		if (not ffile.endswith(".formula")):
+			continue
+		validate_formula_file(ffile)
+
+if __name__ == '__main__':
+	if os.geteuid() != 0:
+		cprint("Must be root", bcolors.FAIL)
+		exit()
+	import sys
+	import argparse
+	parser = argparse.ArgumentParser(
+                    prog='Iterkocze Paka',
+                    description='Iterkocze Paka 3.1.1',
+                    epilog='see `pakaman` for more info',
+                    allow_abbrev=False)
+                    
+	parser.add_argument('-D', '--package_to_download')
+	parser.add_argument('-U', '--uninstall_package_name')
+	parser.add_argument('-i', '--info')
+	parser.add_argument('-s', '--search')
+	parser.add_argument('--sync', action='store_true')
+	parser.add_argument('--update', action='store_true')
+	parser.add_argument('--installed', action='store_true')
+	parser.add_argument('--validate', action='store_true')
+	parser.add_argument('--depends')
+	args = parser.parse_args()
+	init_direct_file()
+	if (args.validate):
+		validate_all_formula_files()
+		exit()
+	if (args.depends):
+		show_depends(args.depends)
+		exit()
+	if (args.installed):
+		show_installed_packages()
+		exit()
+	if (args.update):
+		update_paka()
+		exit()
+	if (args.sync):
+		sync_formula_files()
+		exit()
+	if (args.info):
+		print(get_package_desc(args.info))
+		exit()
+	if (args.search):
+		matches = 0
+		cprint("Searching for {}...".format(args.search), bcolors.OKBLUE)
+		for formula_file in get_all_formula_files():
+			if (args.search in formula_file):
+				matches += 1
+				print("  -", formula_file.replace(".formula", ""))
+		cprint("Found {} matches for {}".format(matches, args.search), bcolors.OKGREEN)
+		exit()
+	if (args.uninstall_package_name):
+		toplevel_package = args.uninstall_package_name
+		uninstall_package(args.uninstall_package_name)
+		exit()
+	if (args.package_to_download == None):
+		cprint("No package specified", bcolors.FAIL)
+		exit()
+	
+	toplevel_package = args.package_to_download
+	do_formula_file(args.package_to_download)
+	

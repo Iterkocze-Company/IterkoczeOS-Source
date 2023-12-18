@@ -1,0 +1,17 @@
+NAME="java"
+DESC="OpenJDK platform"
+SRC_URL="https://anduin.linuxfromscratch.org/BLFS/OpenJDK/OpenJDK-19.0.2/OpenJDK-19.0.2+7-x86_64-bin.tar.xz"
+DEPENDSON=""
+
+BEGIN INSTALL
+	tar xf OpenJDK-19.0.2+7-x86_64-bin.tar.xz
+	cd OpenJDK-19.0.2+7-x86_64-bin
+	install -vdm755 /programs/local/jdk
+	mv -v * /programs/local/jdk
+	chown -R 1000:1000 /programs/local/jdk
+END INSTALL
+
+BEGIN REMOVE
+	rm -rf /programs/local/jdk
+END REMOVE
+

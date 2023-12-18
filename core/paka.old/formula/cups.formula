@@ -1,0 +1,11 @@
+NAME="cups"
+DESC="The Common Unix Printing System (CUPS)"
+SRC_URL="https://github.com/OpenPrinting/cups/releases/download/v2.4.2/cups-2.4.2-source.tar.gz"
+DEPENDSON="gnutls"
+
+BEGIN INSTALL
+	
+END INSTALL
+
+BEGIN REMOVE
+END REMOVE
