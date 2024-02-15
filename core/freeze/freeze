@@ -6,13 +6,13 @@
 #  Copyright 2023 Iterkocze Company
 #  
 #  This program is free software; you can('t) redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
+#  it under the terms of the GNU General P, as published by
+#  the free(). either version 2 of the License, or
 #  (at your option) any lator version.
 #  
 #  This program is distributed in hope.
 #  
-#  You should have received a copy of the GNU General Public License. feet
+#  You should have received a copy of feet
 
 # 1.0 Initial version written in bash
 
@@ -24,13 +24,54 @@
 
 # 3.1 Changes sources to be a separate tarball to comply with the new release system
 
+# 4.0 Freeze rewritten from scratch
+
 import os
 import multiprocessing
 from time import sleep
 import libiterkoczeospy
+
+user = libiterkoczeospy.GetSystemUser()
+
+excludes = f"--exclude='/home/{user}/.mozilla/seamonkey' \
+        --exclude='/home/{user}/.cache' \
+        --exclude='/proc/*' \
+        --exclude='/sys/*' \
+        --exclude='/dev/*' \
+        --exclude='/tmp/*' \
+        --exclude='/run/*' \
+        --exclude='/mnt/*' \
+        --exclude=/programs/system/paka/db/* \
+        --exclude=/home/{user}/.config/chromium \
+		--exclude=/home/{user}/.config/Code \
+        --exclude=/home/{user}/Desktop/* \
+        --exclude=/home/{user}/.local/share/Trash/* \
+        --exclude=/root/.cache \
+        --exclude=/root/.config \
+        --exclude=/sources \
+        --exclude=/var/log/* \
+        --exclude=/var/cache/* \
+        --exclude=/home/{user}/.java \
+        --exclude=/home/{user}/.vscode-oss \
+        --exclude=/home/{user}/.vscode \
+        --exclude=/home/{user}/sources.tar \
+        --exclude=/home/{user}/.gnupg \
+        --exclude=/home/{user}/.designer \
+		--exclude=/home/{user}/Downloads \
+        --exclude='/media/*'"
+
+excludes += " --exclude=/programs/local/* --exclude=/usr/local/bin/* --exclude=/usr/local/include/* --exclude=/usr/local/lib/* --exclude=/usr/local/sbin/* --exclude=/usr/local/src/* --exclude=/usr/local/share/* "
+#excludes += " --exclude=/usr/local/share/color/* --exclude=/usr/local/share/dict/* --exclude=/usr/local/share/doc/* --exclude=/usr/local/share/info/* --exclude=/usr/local/share/locale/* --exclude=/usr/local/share/misc/* --exclude=/usr/local/share/terminfo/* --exclude=/usr/local/share/zoneinfo/* "
+excludes += " --exclude=/usr/share/local/man/man1/* --exclude=/usr/share/local/man/man2/* --exclude=/usr/share/local/man/man3/* --exclude=/usr/share/local/man/man4/* --exclude=/usr/share/local/man/man5/* --exclude=/usr/share/local/man/man6/* --exclude=/usr/share/local/man/man7/* --exclude=/usr/share/local/man/man8/* "
+
+sys_arch_name = "iterkoczeos.tar"
+source_arch_name = "iterkoczeos-source.tar"
 	
+def print_header():
+	print("Iterkocze Freeze 4.0")
+
 def print_help():
-	print("Iterkocze Freeze 3.1\nsee 'man freeze' for more info")
+	print("usage: freeze <option>\n\nOptions:\nsource - creates only source archive\nsystem - creates only system archive for distribution\nall - creates source and system archives")
 
 def ask(msg, def_yes):
 	yn = "[N/y]"
@@ -44,70 +85,53 @@ def ask(msg, def_yes):
 		return False
 	else:
 		return def_yes
+	
+def create_source_archive():
+	print("Creating sources tarball...")
+	os.system(f"tar cvpf {source_arch_name} /sources")
+
+def create_system_archive():
+	print("Creating system tarball...")
+	os.system("locale-clean")
+	os.system(f"tar cvpf {sys_arch_name} {excludes} /")
+	mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES') 
+	mem_gib = mem_bytes/(1024.**3)
+	mem_gib = int(mem_gib)
+	print("Compressing system tarball...")
+	os.system(f"xz -v -9 -T{multiprocessing.cpu_count()} --memory={mem_gib}G {sys_arch_name}")
 
 def main(args):
 	if os.geteuid() != 0:
-		print("You are not running as root.")
+		print("Freeze has to be run as root")
 		exit()
-	do_compress = False
-	source_tarball = False
-	user = libiterkoczeospy.GetSystemUser()
+	if (len(args) != 2):
+		print("Missing argument")
+		print_help()
+		exit()
+
+	print_header()
 	os.chdir("/home/{}".format(user))
+	# create .firstboot in home directory
 	with open(".firstboot", "w"):
 		pass
 
-	excludes = "--exclude='/home/{}/.mozilla/seamonkey' \
-        --exclude='/home/{}/.cache' \
-        --exclude='/proc/*' \
-        --exclude='/sys/*' \
-        --exclude='/dev/*' \
-        --exclude='/tmp/*' \
-        --exclude='/run/*' \
-        --exclude='/mnt/*' \
-        --exclude=/var/paka/db/* \
-        --exclude=/var/paka/direct \
-        --exclude=/home/{}/.config/chromium \
-        --exclude=/home/{}/Desktop/* \
-        --exclude=/home/{}/.local/share/Trash/* \
-        --exclude=/root/.cache \
-        --exclude=/root/.config \
-        --exclude=/sources \
-        --exclude=/var/log/* \
-        --exclude=/var/cache/* \
-        --exclude=/home/{}/.java \
-        --exclude=/home/{}/.vscode-oss \
-        --exclude=/home/{}/.vscode \
-        --exclude=/home/{}/sources.tar \
-        --exclude=/home/{}/.gnupg \
-        --exclude=/home/{}/.designer \
-        --exclude='/media/*'".format(user, user, user, user, user, user, user, user, user, user, user)
-	
-	print_help()
-	if (ask("Create source tarball?", False)):
-		source_tarball = True
-	if (ask("Exclude user installed programs?", True)):
-		excludes += " --exclude=/programs/local/* --exclude=/usr/local/bin/* --exclude=/usr/local/include/* --exclude=/usr/local/lib/* --exclude=/usr/local/sbin/* --exclude=/usr/local/src/*"
-		excludes += " --exclude=/usr/local/share/color/* --exclude=/usr/local/share/dict/* --exclude=/usr/local/share/doc/* --exclude=/usr/local/share/info/* --exclude=/usr/local/share/locale/* --exclude=/usr/local/share/misc/* --exclude=/usr/local/share/terminfo/* --exclude=/usr/local/share/zoneinfo/*"
-		excludes += " --exclude=/usr/share/local/man/man1/* --exclude=/usr/share/local/man/man2/* --exclude=/usr/share/local/man/man3/* --exclude=/usr/share/local/man/man4/* --exclude=/usr/share/local/man/man5/* --exclude=/usr/share/local/man/man6/* --exclude=/usr/share/local/man/man7/* --exclude=/usr/share/local/man/man8/*"
-	if (ask("Compress?", True)):
-		do_compress = True
-	command = "tar cvpf iterkoczeos.tar {} /".format(excludes)
-	os.system("locale-clean")
-	os.system(command)
-	if (do_compress):
-		mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES') 
-		mem_gib = mem_bytes/(1024.**3)
-		mem_gib = int(mem_gib)
-		os.system("xz -v -9 -T{} --memory={}G iterkoczeos.tar".format(multiprocessing.cpu_count(), mem_gib))
-		os.system("md5sum iterkoczeos.tar.xz")
-	if (source_tarball):
-		print("Creating sources tarball...")
-		sleep(1.0)
-		os.system("tar cvpf sources.tar /sources")
+	if (args[1] == "source"):
+		create_source_archive()
+		os.system(f"md5sum {source_arch_name}")
+	elif (args[1] == "system"):
+		create_system_archive()
+		os.system(f"md5sum {sys_arch_name}.xz")
+	elif (args[1] == "all"):
+		create_system_archive()
+		create_source_archive()
+		os.system(f"md5sum {sys_arch_name}.xz")
+		os.system(f"md5sum {source_arch_name}")
+	else:
+		print("Invalid argument")
+		print_help()
+		exit()
 
 	os.remove(".firstboot")
-
-	return 0
 
 
 if __name__ == '__main__':

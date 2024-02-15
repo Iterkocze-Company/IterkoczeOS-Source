@@ -1,1 +1,1 @@
-doas cp -v ./freeze /bin/freeze
+cp -v ./freeze /bin/freeze

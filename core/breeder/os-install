@@ -1,0 +1,68 @@
+#!/bin/sh
+
+echo "IterkoczeOS Installaer 1.1"
+
+tarball="/iterkoczeos.tar.xz"
+
+if ! [[ -f $tarball ]]; then
+	echo "Can't find $tarball"
+	exit
+fi
+
+disk=""
+
+echo -e "Please specify the drive on which the system should be installed. (ex. /dev/sda)\nWARNING! This installator will wipe all partitions on the selected drive\n(CTRL-C to cancel)"
+read disk
+
+part="${disk}1"
+
+if [[ $disk != /dev/*  ]]; then
+	echo "Must start with /dev/"
+	exit
+fi
+
+echo "Formatting the drive..."
+fdisk $disk << EOF
+d
+
+d
+
+d
+
+d
+
+d
+n
+p
+1
+
+
+yes
+w
+EOF
+
+echo "Making the filesystem on ${part}..."
+mkfs.ext4 -F $part
+
+mkdir /mnt
+mount $part /mnt
+
+echo "Installing IterkoczeOS..."
+cd /mnt
+tar xpf $tarball
+
+echo "Validating instal..."
+if ! [[ -d /mnt/bin ]]; then
+	echo "Installation was corrupted. Terminating"
+	exit
+fi
+
+echo "Installing the bootloader..."
+
+mount --bind -v /dev /mnt/dev
+
+chroot /mnt << EOT
+grub-install --boot-directory /boot ${disk}
+grub-mkconfig -o /boot/grub/grub.cfg
+echo "Review the installation output, and boot into IterkoczeOS
+EOT
