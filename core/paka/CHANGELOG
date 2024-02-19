@@ -46,3 +46,5 @@
 # 3.1.1 Fixed a major bug that caused the wrong SRC_URL to be selected. --installed flag now properly shows size of packages installed in /programs (this is actually such a buggy mess. Help me aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa why. why did i do it the way i did? I regret everytjing, I shou;d have known the consequences of writinh tech debt code. I made this mistake so many times. Please, forgive me)
 
 # 4.0.0 Paka rewritten from scratch
+
+# 4.1.0 Fixed a crash when downloading packages, renamed `package --find` to `package --search`, added `package --info`

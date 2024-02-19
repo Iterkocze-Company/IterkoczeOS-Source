@@ -45,11 +45,13 @@ class Program {
 
         var packFormulaOption = new Option<bool>(name: "--pack-formula", description: "Packs formula files into .tar");
 
-        var findFormulaOption = new Option<string>(name: "--find", description: "Finds a formula file for specified package");
+        var findFormulaOption = new Option<string>(name: "--search", description: "Finds a formula file for specified package");
 
         var validateFormulaOption = new Option<bool>(name: "--validate-formula-files", description: "Validates all formula files");
 
         var updatePakaOption = new Option<bool>(name: "--update-paka", description: "Updates paka");
+
+        var formulaInfoOption = new Option<string>(name: "--info", description: "Displays information about a formula");
 
         rootCommand.Add(unlockOption);
         rootCommand.AddGlobalOption(debugOption); // this doesnt work
@@ -64,6 +66,7 @@ class Program {
         packageCommand.Add(uninstallOption);
         packageCommand.Add(listInstalledOption);
         packageCommand.Add(findFormulaOption);
+        packageCommand.Add(formulaInfoOption);
 
         rootCommand.AddCommand(utilCommand);
         rootCommand.AddCommand(packageCommand);
@@ -98,7 +101,7 @@ class Program {
             }
         }, testOption, packFormulaOption, validateFormulaOption, updatePakaOption);
 
-        packageCommand.SetHandler((downloadOptionValue, cleanOptionValue, listInstalledValue, findFormulaValue, uninstallOptionValue) => {
+        packageCommand.SetHandler((downloadOptionValue, cleanOptionValue, listInstalledValue, findFormulaValue, uninstallOptionValue, formulaInfoOptionValue) => {
             if (downloadOptionValue != null) {
                 DoPackageDownload(downloadOptionValue);
             }
@@ -114,7 +117,10 @@ class Program {
             if (uninstallOptionValue != null) {
                 DoPackageUninstall(uninstallOptionValue);
             }
-        }, downloadOption, cleanOption, listInstalledOption, findFormulaOption, uninstallOption);
+            if (formulaInfoOptionValue != null) {
+                FormulaInfo(formulaInfoOptionValue);
+            }
+        }, downloadOption, cleanOption, listInstalledOption, findFormulaOption, uninstallOption, formulaInfoOption);
 
 
         rootCommand.Invoke(args);
@@ -125,13 +131,12 @@ class Program {
     }
 
     private static void UpdatePaka() {
-        System.Console.WriteLine("Not implemnted");
+        Console.WriteLine("Not implemnted");
     }
 
     private static void FindFormula(string name) {
         Log.Info($"Searching for {name}...");
         var files = Directory.GetFiles(Globals.PAKA_FORMULADIR);
-        List<string> ret = new();
         int hits = 0;
         foreach (var dir in files) {
             if (dir.Contains(name)) {
@@ -140,7 +145,15 @@ class Program {
                 hits++;
             }
         }
-        Log.Success($"Found {hits} matches");
+        Log.Info($"Found {hits} matches");
+    }
+
+    private static void FormulaInfo(string name) {
+        Formula f = new(name);
+
+        Console.WriteLine($"Formula information for: {name}");
+        Console.WriteLine($"Formula type: {f.GetFormulaType()}");
+        Console.WriteLine($"Description: {f.Properties["DESC"]}");
     }
 
     private static void PackFormulaFiles() {

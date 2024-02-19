@@ -18,6 +18,8 @@ class Formula {
         {"HOLD", false},
         {"AUTO_REMOVE", false},
         {"NO_DOWNLOAD", false},
+        {"BIN", false},
+        {"SRC", false},
     };
 
     public List<Formula> Dependencies {get; set;} = new();
@@ -210,12 +212,24 @@ class Formula {
         }
     }
 
+    public string GetFormulaType() {
+        if (Switches["BIN"])
+            return "Binary";
+        else if (Switches["SRC"])
+            return "Source";
+        else
+            return "Unknown";
+    }
+
     public void Validate() {
         if (string.IsNullOrEmpty(InstallProcedure)) {
             Log.Error($"{Name} does not contain the INSTALL procedure");
         }
         if (Switches["HOLD"]) {
             Log.Warning($"{Name} has HOLD enabled");
+        }
+        if (Switches["SRC"] && Switches["BIN"]) {
+            Log.Warning($"{Name} is both SRC and BIN");
         }
     }
 
