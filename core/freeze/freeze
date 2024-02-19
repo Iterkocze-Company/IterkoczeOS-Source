@@ -58,7 +58,8 @@ excludes = f"--exclude='/home/{user}/.mozilla/seamonkey' \
         --exclude=/home/{user}/.gnupg \
         --exclude=/home/{user}/.designer \
 		--exclude=/home/{user}/Downloads \
-        --exclude='/media/*'"
+        --exclude='/media/*' \
+		--exclude=/programs/system/breeder/data"
 
 excludes += " --exclude=/programs/local/* --exclude=/usr/local/bin/* --exclude=/usr/local/include/* --exclude=/usr/local/lib/* --exclude=/usr/local/sbin/* --exclude=/usr/local/src/* --exclude=/usr/local/share/* "
 #excludes += " --exclude=/usr/local/share/color/* --exclude=/usr/local/share/dict/* --exclude=/usr/local/share/doc/* --exclude=/usr/local/share/info/* --exclude=/usr/local/share/locale/* --exclude=/usr/local/share/misc/* --exclude=/usr/local/share/terminfo/* --exclude=/usr/local/share/zoneinfo/* "

@@ -132,7 +132,7 @@ class Formula {
         }
 
         List<string> AllFilesBefore = Directory.GetFiles("/usr/local", "*.*", SearchOption.AllDirectories).ToList();
-        AllFilesBefore.AddRange(Directory.GetFiles("/programs", "*.*", SearchOption.AllDirectories).ToList());
+        AllFilesBefore.AddRange(Directory.GetFiles("/programs/local", "*.*", SearchOption.AllDirectories).ToList());
 
 
         Log.Info($"Executing BEGIN INSTALL for {Name}...");
@@ -140,7 +140,7 @@ class Formula {
         _RunProcess(InstallProcedure);
 
         List<string> AllFilesAfter = Directory.GetFiles("/usr/local", "*.*", SearchOption.AllDirectories).ToList();
-        AllFilesAfter.AddRange(Directory.GetFiles("/programs", "*.*", SearchOption.AllDirectories).ToList());
+        AllFilesAfter.AddRange(Directory.GetFiles("/programs/local", "*.*", SearchOption.AllDirectories).ToList());
 
         List<string> AllFilesInstalled = AllFilesBefore.Except(AllFilesAfter).Concat(AllFilesAfter.Except(AllFilesBefore)).ToList();
 
