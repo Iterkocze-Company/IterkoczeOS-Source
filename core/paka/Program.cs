@@ -137,13 +137,21 @@ class Program {
     private static void FindFormula(string name) {
         Log.Info($"Searching for {name}...");
         var files = Directory.GetFiles(Globals.PAKA_FORMULADIR);
+        List<string> names = new(); 
         int hits = 0;
+
+        
+
         foreach (var dir in files) {
             if (dir.Contains(name)) {
-                var parts = dir.Split('/');
-                Console.WriteLine(parts[parts.Length - 1]);
+                names.Add(Formula.FormulaFileToName(dir));
                 hits++;
             }
+        }
+
+        foreach (var n in names) {
+            var f = new Formula(n);
+            Console.WriteLine($"{n} - [{f.GetFormulaType()}]");
         }
         Log.Info($"Found {hits} matches");
     }

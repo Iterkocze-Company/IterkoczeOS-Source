@@ -10,9 +10,9 @@ class Formula {
     public bool IsDirectlyInstalled {get; private set;}
     public bool IsInstalled {get; private set;}
 
-    public Dictionary<string, string> Properties {get; set;} = new Dictionary<string, string>() {
-        {"DESC", string.Empty},
-        {"SRC_URL", string.Empty},
+    public readonly Dictionary<string, Property> Properties = new() {
+        {"DESC", new() {IsRequired = false} },
+        {"SRC_URL", new() {IsRequired = true} },
     };
     public Dictionary<string, bool> Switches {get; set;} = new Dictionary<string, bool>() {
         {"HOLD", false},
@@ -27,68 +27,18 @@ class Formula {
     public Formula(string formulaFileName) {
         Name = formulaFileName;
         string formulaFilePath = Globals.PAKA_FORMULADIR + formulaFileName + ".formula";
-        
-        // Procedures
-        StringBuilder installProcedure = new();
-        StringBuilder removeProcedure = new();
-        bool insideProcedure = false;
+        var fileContent = File.ReadLines(formulaFilePath);
 
-        foreach (string line in File.ReadLines(formulaFilePath)) {
-            if (line.StartsWith("BEGIN INSTALL")) {
-                insideProcedure = true;
-                continue;
-            }
-
-            if (insideProcedure) {
-                if (line.StartsWith("END INSTALL")) {
-                    insideProcedure = false;
-                    break;
-                }
-
-                installProcedure.AppendLine(line);
-            }
-        }
-
-        foreach (string line in File.ReadLines(formulaFilePath)) {
-            if (line.StartsWith("BEGIN REMOVE")) {
-                insideProcedure = true;
-                continue;
-            }
-
-            if (insideProcedure) {
-                if (line.StartsWith("END REMOVE")) {
-                    insideProcedure = false;
-                    break;
-                }
-
-                removeProcedure.AppendLine(line);
-            }
-        }
-        InstallProcedure = installProcedure.ToString();
-        RemoveProcedure = removeProcedure.ToString();
-
-        // Properties
-        foreach (var line in File.ReadLines(formulaFilePath)) {
-            if (line.StartsWith("DESC"))
-                Properties["DESC"] = line.Replace("\"", "").Replace("DESC=", "");
-            if (line.StartsWith("SRC_URL"))
-                Properties["SRC_URL"] = line.Replace("\"", "").Replace("SRC_URL=", "");
-        }
-
-        // Switches
-        foreach (var key in Switches.Keys) {
-            foreach (string line in File.ReadLines(formulaFilePath)) {
-                if (line.StartsWith(key)) {
-                    Switches[key] = true;
-                }
-            }
-        }
+        InstallProcedure = string.Join("", _ReadProcedure("INSTALL", fileContent, formulaFileName));
+        RemoveProcedure = string.Join("", _ReadProcedure("REMOVE", fileContent, formulaFileName));
+        _EvalInfoProcedure(_ReadProcedure("INFO", fileContent, formulaFileName));
 
         // Dependencies
         // NOTE: I think it might cause a crash due to circular dependencies
-        foreach (string line in File.ReadLines(formulaFilePath)) {
-            if (line.StartsWith("DEPENDSON")) {
-                var v = line.Replace("\"", "").Replace("DEPENDSON=", "").Trim().Split(',');
+        // TODO: This is really a property, so it should be in the Properties and not be a special thing
+        foreach (string line in fileContent) {
+            if (line.Trim().StartsWith("DEPENDSON")) {
+                var v = line.Trim().Replace("\"", "").Replace("DEPENDSON=", "").Trim().Split(',');
                 foreach (var val in v) {
                     if (!string.IsNullOrEmpty(val))
                         Dependencies.Add(new Formula(val.Trim()));
@@ -96,10 +46,7 @@ class Formula {
             }
         }
 
-        // IsDirectlyInstalled
         IsDirectlyInstalled = LocalDatabase.IsDirectlyInstalled(Name);
-
-        //IsInstalled
         IsInstalled = LocalDatabase.IsInstalled(Name);
     }
 
@@ -113,6 +60,8 @@ class Formula {
     public void DoInstallProcedure() {
         Log.Info($"Resolving install procedure for {Name}...");
         Thread.Sleep(1000);
+
+        Validate();
 
         Directory.CreateDirectory($"/tmp/{Name}");
         Directory.SetCurrentDirectory($"/tmp/{Name}");
@@ -171,6 +120,8 @@ class Formula {
         Log.Info($"Resolving remove procedure for {Name}...");
         Thread.Sleep(1000);
 
+        Validate();
+
         if (Switches["AUTO_REMOVE"]) {
             Log.Info($"Executing AUTO_REMOVE for {Name}...");
             var filesToRemove = LocalDatabase.ReadDBFile(Name, "remove.db");
@@ -222,14 +173,90 @@ class Formula {
     }
 
     public void Validate() {
-        if (string.IsNullOrEmpty(InstallProcedure)) {
-            Log.Error($"{Name} does not contain the INSTALL procedure");
+        int errors = 0;
+
+        Log.Info($"validating {Name}...");
+
+        foreach (var prop in Properties) {
+            if (prop.Value.Value == "" && prop.Value.IsRequired) {
+                Log.Error($"{prop.Key} is required, but not set");
+                errors++;
+            }
         }
+
         if (Switches["HOLD"]) {
             Log.Warning($"{Name} has HOLD enabled");
         }
         if (Switches["SRC"] && Switches["BIN"]) {
             Log.Warning($"{Name} is both SRC and BIN");
+        }
+
+        if (errors > 0) {
+            Log.Error($"Can't continiue, because this formula file contains {errors} critical errors");
+            Environment.Exit(1);
+        }
+    }
+
+    /// <summary>
+    /// <para> n => /some/directory/dummy.formula </para>
+    /// n = dummy
+    /// </summary>
+    /// <returns></returns>
+    public static string FormulaFileToName(string n) {
+        var parts = n.Split('/');
+        var name = parts[parts.Length - 1];
+        name = name.Split('.')[0];
+
+        return name;
+    }
+
+    private string[] _ReadProcedure(string procName, IEnumerable<string> fileContent, string fileName) {
+        bool insideProcedure = false;
+        bool beginFound = false;
+        bool endFound = false;
+        List<string> ret = new();
+
+        foreach (string line in fileContent) {
+            if (line.StartsWith($"BEGIN {procName}")) {
+                insideProcedure = true;
+                beginFound = true;
+                continue;
+            }
+
+            if (insideProcedure) {
+                if (line.StartsWith($"END {procName}")) {
+                    insideProcedure = false;
+                    endFound = true;
+                    break;
+                }
+                ret.Add(line.Trim());
+            }
+        }
+
+        if (!beginFound || !endFound) {
+            Log.Error($"Procedure {procName} was not found in {fileName}.formula");
+            Environment.Exit(1);
+        }
+
+        return ret.ToArray();
+    }
+
+    private void _EvalInfoProcedure(IEnumerable<string> content) {
+        foreach (var line in content) {
+            foreach (var prop in Properties) {
+                if (line.StartsWith(prop.Key)) {
+                    Properties[prop.Key].Value = line.Replace("\"", "").Replace($"{prop.Key}=", "");
+                }
+            }
+        }
+
+        foreach (var key in Switches.Keys) {
+            foreach (string line in content) {
+                // NOTE: The part after && is an AWFUL hack
+                if (line.StartsWith(key) && !line.StartsWith("SRC_URL")) {
+                    Switches[key] = true;
+                }
+            }
         }
     }
 
