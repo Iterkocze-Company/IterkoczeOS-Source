@@ -30,8 +30,8 @@ public class Formula {
         string formulaFilePath = Globals.PAKA_FORMULADIR + formulaFileName + ".formula";
         var fileContent = File.ReadLines(formulaFilePath);
 
-        InstallProcedure = string.Join("", _ReadProcedure("INSTALL", fileContent, formulaFileName));
-        RemoveProcedure = string.Join("", _ReadProcedure("REMOVE", fileContent, formulaFileName));
+        InstallProcedure = string.Join(" && ", _ReadProcedure("INSTALL", fileContent, formulaFileName))[0..^3];
+        RemoveProcedure = string.Join(" && ", _ReadProcedure("REMOVE", fileContent, formulaFileName))[0..^3];
         _EvalInfoProcedure(_ReadProcedure("INFO", fileContent, formulaFileName));
 
         IsDirectlyInstalled = LocalDatabase.IsDirectlyInstalled(Name);
@@ -70,7 +70,7 @@ public class Formula {
             wget.StartInfo.FileName = "wget";
             wget.StartInfo.RedirectStandardOutput = true;
             wget.StartInfo.RedirectStandardInput = true;
-            wget.StartInfo.Arguments = Properties["SRC_URL"] + " -q --show-progress";
+            wget.StartInfo.Arguments = Properties["SRC_URL"].Value + " -q --show-progress";
             wget.Start();
             wget.WaitForExit();
             if (wget.ExitCode != 0) {
@@ -223,7 +223,8 @@ public class Formula {
         bool insideProcedure = false;
         bool beginFound = false;
         bool endFound = false;
-        List<string> ret = new();
+        //List<string> ret = new();
+        StringBuilder sb = new();
 
         foreach (string line in fileContent) {
             if (line.StartsWith($"BEGIN {procName}")) {
@@ -236,9 +237,10 @@ public class Formula {
                 if (line.StartsWith($"END {procName}")) {
                     insideProcedure = false;
                     endFound = true;
+                    sb.AppendLine(":");
                     break;
                 }
-                ret.Add(line.Trim());
+                sb.AppendLine(line.Trim());
             }
         }
 
@@ -247,7 +249,7 @@ public class Formula {
             Environment.Exit(1);
         }
 
-        return ret.ToArray();
+        return sb.ToString().Split(Environment.NewLine.ToCharArray());
     }
 
     private void _EvalInfoProcedure(IEnumerable<string> content) {

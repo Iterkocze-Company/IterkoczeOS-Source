@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/bin/Debug/net7.0/paka.dll",
-            "args": ["package", "-C", "dummy"],
+            "args": ["package", "-D", "emacs"],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "console": "internalConsole"

@@ -54,3 +54,5 @@
 # 5.0.1 Fixed dependency cleanup. Code cleanup
 
 # 5.0.2 Bugfix - direct file being overwritten, Bugfix - direct packages being uninstalled by -C
+
+# 5.0.3 Bugfix - Reading procedures broken, Optimisation - Used StringBuilder instead of List<string> during procedure building
