@@ -139,9 +139,7 @@ class Program {
         var files = Directory.GetFiles(Globals.PAKA_FORMULADIR);
         List<string> names = new(); 
         int hits = 0;
-
-        
-
+    
         foreach (var dir in files) {
             if (dir.Contains(name)) {
                 names.Add(Formula.FormulaFileToName(dir));
@@ -151,7 +149,12 @@ class Program {
 
         foreach (var n in names) {
             var f = new Formula(n);
-            Console.WriteLine($"{n} - [{f.GetFormulaType()}]");
+            char sep = '\\';
+            Console.WriteLine($"\t{n} => [{f.GetFormulaType()}] {f.Properties["DESC"].Value}");
+            foreach(var dep in f.Dependencies) {
+                Console.WriteLine($"\t\t{sep}-> {dep.Name} {(dep.IsInstalled ? "[INSTALLED]" : "")}");
+                sep = '|';
+            }
         }
         Log.Info($"Found {hits} matches");
     }

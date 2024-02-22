@@ -1,5 +1,5 @@
 public static class Globals {
-    public static readonly string VERSION = "5.0.3";
+    public static readonly string VERSION = "5.0.4";
     public static readonly string PAKA_BASEDIR = "/programs/system/paka/";
     public static readonly string PAKA_FORMULADIR = PAKA_BASEDIR + "formula/";
     public static readonly string PAKA_DBDIR = PAKA_BASEDIR + "db/";
