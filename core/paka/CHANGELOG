@@ -52,3 +52,5 @@
 # 5.0.0 New formula file syntax. Not compatibile with the old one. Code cleanup. Paka now shows formula type in --search
 
 # 5.0.1 Fixed dependency cleanup. Code cleanup
+
+# 5.0.2 Bugfix - direct file being overwritten, Bugfix - direct packages being uninstalled by -C

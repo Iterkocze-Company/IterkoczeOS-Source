@@ -256,13 +256,23 @@ class Program {
         Formula.ToplevelPackage = new(packageName);
         Log.Info("Calculating dependencies...");
         List<Formula> depsToRemove = Formula.ToplevelPackage.ResolveDependencies();
+        List<Formula> directDeps = new();
+
+        foreach (var dep in depsToRemove) {
+            if (dep.IsDirectlyInstalled) {
+                Log.Info($"Dependency '{dep.Name}' won't be uninstalled, because it was directly installed");
+                directDeps.Add(dep);
+            }
+        }
+
+        depsToRemove = depsToRemove.Except(directDeps).ToList();
 
         foreach (var dep in Formula.ToplevelPackage.Dependencies) {
             var rDeps = dep.GetReverseDependencies();
             var preventingFormulas = rDeps.Where(rdep => rdep.IsInstalled && rdep.Name != Formula.ToplevelPackage.Name).ToArray();
 
             if (preventingFormulas.Length > 0) {
-                Log.Info($"Dependency '{dep.Name}' Won't be removed, because the following installed packages depend on it:");
+                Log.Info($"Dependency '{dep.Name}' won't be uninstalled, because the following installed packages depend on it:");
                 foreach (var p in preventingFormulas) {
                     Console.WriteLine("\t"+p.Name);
                 }

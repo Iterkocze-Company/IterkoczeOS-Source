@@ -36,7 +36,7 @@ public static class LocalDatabase {
             return;
         }
 
-        File.WriteAllLines(Globals.PAKA_DBDIR + "direct", new []{packageName});
+        File.AppendAllLines(Globals.PAKA_DBDIR + "direct", new []{packageName});
     }
 
     public static void UnmarkAsDirectlyInstalled(string packageName) {
