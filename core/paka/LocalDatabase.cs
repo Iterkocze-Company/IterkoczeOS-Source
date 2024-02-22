@@ -65,4 +65,14 @@ public static class LocalDatabase {
 
         return ret.ToArray();
     }
+
+    public static Formula[] GetAllFormulas() {
+        List<Formula> ret = new();
+        foreach (string name in Directory.GetFiles(Globals.PAKA_FORMULADIR)) {
+            var f = Formula.FormulaFileToName(name);
+            ret.Add(new Formula(f));
+        }
+
+        return ret.ToArray();
+    }
 }

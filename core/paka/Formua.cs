@@ -2,7 +2,7 @@ using System.Text;
 using System.Linq;
 using System.Diagnostics;
 
-class Formula {
+public class Formula {
     public static Formula? ToplevelPackage = null;
     public string Name {get; set;}
     public string InstallProcedure {get; private set;}
@@ -13,6 +13,7 @@ class Formula {
     public readonly Dictionary<string, Property> Properties = new() {
         {"DESC", new() {IsRequired = false} },
         {"SRC_URL", new() {IsRequired = true} },
+        {"DEPENDSON", new() {IsRequired = false} },
     };
     public Dictionary<string, bool> Switches {get; set;} = new Dictionary<string, bool>() {
         {"HOLD", false},
@@ -33,21 +34,17 @@ class Formula {
         RemoveProcedure = string.Join("", _ReadProcedure("REMOVE", fileContent, formulaFileName));
         _EvalInfoProcedure(_ReadProcedure("INFO", fileContent, formulaFileName));
 
-        // Dependencies
-        // NOTE: I think it might cause a crash due to circular dependencies
-        // TODO: This is really a property, so it should be in the Properties and not be a special thing
-        foreach (string line in fileContent) {
-            if (line.Trim().StartsWith("DEPENDSON")) {
-                var v = line.Trim().Replace("\"", "").Replace("DEPENDSON=", "").Trim().Split(',');
-                foreach (var val in v) {
-                    if (!string.IsNullOrEmpty(val))
-                        Dependencies.Add(new Formula(val.Trim()));
-                }
-            }
-        }
-
         IsDirectlyInstalled = LocalDatabase.IsDirectlyInstalled(Name);
         IsInstalled = LocalDatabase.IsInstalled(Name);
+    }
+
+    public static Formula[] FormulasFromNames(string[] names) {
+        List<Formula> ret = new();
+
+        foreach (var name in names) {
+            ret.Add(new Formula(name));
+        }
+        return ret.ToArray();
     }
 
     public static bool Exists(string formulaFileName) {
@@ -143,6 +140,18 @@ class Formula {
         _ResolveDependenciesRecursive(this, dependencies);
         dependencies.RemoveAt(0);
         return dependencies;
+    }
+
+    public Formula[] GetReverseDependencies() {
+        List<Formula> ret = new();
+
+        foreach (var formula in LocalDatabase.GetAllFormulas()) {
+            if (formula.Dependencies.Any(dep => dep.Name == this.Name)) {
+                ret.Add(formula);
+            }
+        }
+        
+        return ret.ToArray();
     }
 
     public static void ValidateAll() {
@@ -242,6 +251,10 @@ class Formula {
     }
 
     private void _EvalInfoProcedure(IEnumerable<string> content) {
+        // NOTE: I don't like how Switches and properties are two different things
+        // Because of this, I have to make this chain of foreaches
+        // Maybe all properties inside the INFO proc should be in one variable?
+
         foreach (var line in content) {
             foreach (var prop in Properties) {
                 if (line.StartsWith(prop.Key)) {
@@ -256,6 +269,16 @@ class Formula {
                 if (line.StartsWith(key) && !line.StartsWith("SRC_URL")) {
                     Switches[key] = true;
                 }
+            }
+        }
+
+        string[] dependsonValues = Properties["DEPENDSON"].Value.Trim().Replace("\"", "").Trim().Split(',');
+
+        // NOTE: I don't know if I like the way unset properties are handled.
+        // Maybe there should be a `bool isSet` inside the Property class?
+        if (dependsonValues[0] != String.Empty) {
+            foreach (string value in dependsonValues) {
+                Dependencies.Add(new Formula(value.Trim()));
             }
         }
     }

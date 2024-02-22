@@ -50,3 +50,5 @@
 # 4.1.0 Fixed a crash when downloading packages, renamed `package --find` to `package --search`, added `package --info`
 
 # 5.0.0 New formula file syntax. Not compatibile with the old one. Code cleanup. Paka now shows formula type in --search
+
+# 5.0.1 Fixed dependency cleanup. Code cleanup

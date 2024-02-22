@@ -103,7 +103,7 @@ class Program {
 
         packageCommand.SetHandler((downloadOptionValue, cleanOptionValue, listInstalledValue, findFormulaValue, uninstallOptionValue, formulaInfoOptionValue) => {
             if (downloadOptionValue != null) {
-                DoPackageDownload(downloadOptionValue);
+                DoPackageInstall(downloadOptionValue);
             }
             if (cleanOptionValue != null) {
                 DoPackageClean(cleanOptionValue);
@@ -211,7 +211,7 @@ class Program {
         packageToUninstall.DoRemoveProcedure();
     }
 
-    private static void DoPackageDownload(string packageName) {
+    private static void DoPackageInstall(string packageName) {
         if (!Formula.Exists(packageName)) {
             Log.Error($"{packageName}.formula can't be found");
             Environment.Exit(1);
@@ -256,6 +256,19 @@ class Program {
         Formula.ToplevelPackage = new(packageName);
         Log.Info("Calculating dependencies...");
         List<Formula> depsToRemove = Formula.ToplevelPackage.ResolveDependencies();
+
+        foreach (var dep in Formula.ToplevelPackage.Dependencies) {
+            var rDeps = dep.GetReverseDependencies();
+            var preventingFormulas = rDeps.Where(rdep => rdep.IsInstalled && rdep.Name != Formula.ToplevelPackage.Name).ToArray();
+
+            if (preventingFormulas.Length > 0) {
+                Log.Info($"Dependency '{dep.Name}' Won't be removed, because the following installed packages depend on it:");
+                foreach (var p in preventingFormulas) {
+                    Console.WriteLine("\t"+p.Name);
+                }
+                depsToRemove.Remove(dep);
+            }
+        }
 
         Console.WriteLine("The following packages will be removed");
         Console.WriteLine("\t" + packageName);
