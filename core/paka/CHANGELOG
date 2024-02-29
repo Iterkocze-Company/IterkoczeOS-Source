@@ -58,3 +58,7 @@
 # 5.0.3 Bugfix - Reading procedures broken, Optimisation - Used StringBuilder instead of List<string> during procedure building
 
 # 5.0.4 Changed how the information about packages is displayed. Now it gives more information
+
+# 5.0.5 Bugfix - Formula files having empty lines caused paka to produce incorrect shell script
+
+# 5.0.6 Bugfix - Reversed the package install order, packages that are dependencies of other installed packages can't be uninstalled with `-U`, removed empty `--update` switch, updating moved to scripts

@@ -64,6 +64,7 @@ excludes = f"--exclude='/home/{user}/.mozilla/seamonkey' \
 excludes += " --exclude=/programs/local/* --exclude=/usr/local/bin/* --exclude=/usr/local/include/* --exclude=/usr/local/lib/* --exclude=/usr/local/sbin/* --exclude=/usr/local/src/* --exclude=/usr/local/share/* "
 excludes += " --exclude=/usr/user/bin/* --exclude=/usr/user/include/* --exclude=/usr/user/lib/* --exclude=/usr/user/libexec/* --exclude=/usr/user/share/* --exclude=/usr/user/src/*"
 excludes += " --exclude=/usr/share/local/man/man1/* --exclude=/usr/share/local/man/man2/* --exclude=/usr/share/local/man/man3/* --exclude=/usr/share/local/man/man4/* --exclude=/usr/share/local/man/man5/* --exclude=/usr/share/local/man/man6/* --exclude=/usr/share/local/man/man7/* --exclude=/usr/share/local/man/man8/* "
+excludes += " --exclude=/opt/emacs-29.2 "
 
 sys_arch_name = "iterkoczeos.tar"
 source_arch_name = "iterkoczeos-source.tar"

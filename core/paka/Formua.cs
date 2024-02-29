@@ -223,7 +223,6 @@ public class Formula {
         bool insideProcedure = false;
         bool beginFound = false;
         bool endFound = false;
-        //List<string> ret = new();
         StringBuilder sb = new();
 
         foreach (string line in fileContent) {
@@ -240,7 +239,8 @@ public class Formula {
                     sb.AppendLine(":");
                     break;
                 }
-                sb.AppendLine(line.Trim());
+                if (!string.IsNullOrWhiteSpace(line))
+                    sb.AppendLine(line.Trim());
             }
         }
 

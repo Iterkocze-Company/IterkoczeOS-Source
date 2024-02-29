@@ -1,3 +1,7 @@
 iw-5.19:
 	libnl-3.7.0
 libnl-3.7.0
+
+graphics and mesa:
+	llvm
+

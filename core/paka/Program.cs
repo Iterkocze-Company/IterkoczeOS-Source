@@ -49,8 +49,6 @@ class Program {
 
         var validateFormulaOption = new Option<bool>(name: "--validate-formula-files", description: "Validates all formula files");
 
-        var updatePakaOption = new Option<bool>(name: "--update-paka", description: "Updates paka");
-
         var formulaInfoOption = new Option<string>(name: "--info", description: "Displays information about a formula");
 
         rootCommand.Add(unlockOption);
@@ -59,7 +57,6 @@ class Program {
         utilCommand.Add(testOption);
         utilCommand.Add(packFormulaOption);
         utilCommand.Add(validateFormulaOption);
-        utilCommand.Add(updatePakaOption);
 
         packageCommand.Add(downloadOption);
         packageCommand.Add(cleanOption);
@@ -86,7 +83,7 @@ class Program {
             }
         }, unlockOption, debugOption);
 
-        utilCommand.SetHandler((testOptionValue, packFormulaValue, validateFormulaValue, updatePakaValue) => {
+        utilCommand.SetHandler((testOptionValue, packFormulaValue, validateFormulaValue) => {
             if (testOptionValue) {
                 Test.Run();
             }
@@ -96,10 +93,7 @@ class Program {
             if (validateFormulaValue) {
                 Formula.ValidateAll();
             }
-            if (updatePakaValue) {
-                UpdatePaka();
-            }
-        }, testOption, packFormulaOption, validateFormulaOption, updatePakaOption);
+        }, testOption, packFormulaOption, validateFormulaOption);
 
         packageCommand.SetHandler((downloadOptionValue, cleanOptionValue, listInstalledValue, findFormulaValue, uninstallOptionValue, formulaInfoOptionValue) => {
             if (downloadOptionValue != null) {
@@ -128,10 +122,6 @@ class Program {
             Console.WriteLine($"Iterkocze Paka {Globals.VERSION}");
             Console.WriteLine("--h or --help for list of switches");
         }
-    }
-
-    private static void UpdatePaka() {
-        Console.WriteLine("Not implemnted");
     }
 
     private static void FindFormula(string name) {
@@ -226,13 +216,14 @@ class Program {
         Formula.ToplevelPackage = new(packageName);
         Log.Info("Calculating dependencies...");
         List<Formula> depsToinstall = Formula.ToplevelPackage.ResolveDependencies().Where(dep => !LocalDatabase.IsInstalled(dep.Name)).ToList();
-
+        depsToinstall.Reverse();
+        
         if (depsToinstall.Count > 0) {
-            Console.WriteLine("The following packages will be installed");
-            Console.WriteLine("\t" + Formula.ToplevelPackage.Name);
+            Console.WriteLine("The following packages will be installed (in this order)");
             foreach (Formula dep in depsToinstall) {
                 Console.WriteLine("\t" + dep.Name);
             }
+            Console.WriteLine("\t" + Formula.ToplevelPackage.Name);
             if (!AskToProceed("Do you want to continue?")) 
                 Environment.Exit(0);
 
@@ -270,18 +261,28 @@ class Program {
 
         depsToRemove = depsToRemove.Except(directDeps).ToList();
 
-        foreach (var dep in Formula.ToplevelPackage.Dependencies) {
-            var rDeps = dep.GetReverseDependencies();
-            var preventingFormulas = rDeps.Where(rdep => rdep.IsInstalled && rdep.Name != Formula.ToplevelPackage.Name).ToArray();
+        var rdeps = Formula.ToplevelPackage.GetReverseDependencies();
+        var preventingFormulas = rdeps.Where(rdep => rdep.IsInstalled).ToArray();
 
-            if (preventingFormulas.Length > 0) {
-                Log.Info($"Dependency '{dep.Name}' won't be uninstalled, because the following installed packages depend on it:");
-                foreach (var p in preventingFormulas) {
-                    Console.WriteLine("\t"+p.Name);
-                }
-                depsToRemove.Remove(dep);
-            }
+        foreach (var p in preventingFormulas) {
+            Log.Info($"{packageName} can't be uninstalled because {p.Name} depends on it");
         }
+        if (preventingFormulas.Length > 0) {
+            return;
+        }
+
+        // foreach (var dep in Formula.ToplevelPackage.Dependencies) {
+        //     var rDeps = dep.GetReverseDependencies();
+        //     var preventingFormulas = rDeps.Where(rdep => rdep.IsInstalled && rdep.Name != Formula.ToplevelPackage.Name).ToArray();
+
+        //     if (preventingFormulas.Length > 0) {
+        //         Log.Info($"Dependency '{dep.Name}' won't be uninstalled, because the following installed packages depend on it:");
+        //         foreach (var p in preventingFormulas) {
+        //             Console.WriteLine("\t"+p.Name);
+        //         }
+        //         depsToRemove.Remove(dep);
+        //     }
+        // }
 
         Console.WriteLine("The following packages will be removed");
         Console.WriteLine("\t" + packageName);
