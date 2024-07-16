@@ -1,0 +1,2 @@
+/sources/core/paka/bin/Release/net8.0/linux-x64/publish/paka.pdb
+/sources/core/paka/bin/Release/net8.0/linux-x64/publish/paka

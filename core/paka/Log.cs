@@ -1,4 +1,6 @@
 public static class Log {
+    // TODO: This class should probably also log to a text file somewhere. As of now it only logs to the STDOUT
+    // Byt maybe do that only if the Debug option is enabled
     public static void Error(string msg) {
         ConsoleColor oldColor = Console.ForegroundColor;
         Console.ForegroundColor = ConsoleColor.Red;

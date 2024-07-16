@@ -1,14 +1,19 @@
 ﻿using System;
 using System.CommandLine;
+using System.Diagnostics;
 
 class Program {
     private static void CheckAndInit() {
-        var direct_file = Globals.PAKA_DBDIR + "direct";
-        if (!File.Exists(direct_file)) {
-            Log.Info($"{Globals.PAKA_DBDIR + "direct"} doesn't exist. Creating");
-            File.Create(direct_file).Close();
-            Log.Info("Please restart paka");
-            Environment.Exit(112);
+        var requiredFiles = new string[] { 
+            Globals.PAKA_DBDIR + "direct",
+            Globals.DB_LOCAL_UPDATE_FILE 
+        };
+
+        foreach (var requiredFile in requiredFiles) {
+            if (!File.Exists(requiredFile)) {
+                Log.Info($"{requiredFile} doesn't exist. Creating");
+                File.Create(requiredFile).Close();
+            }
         }
     }
     private static void ProcessExit(object? sender, EventArgs e) {
@@ -25,6 +30,7 @@ class Program {
         var rootCommand = new RootCommand($"Iterkocze Paka {Globals.VERSION}");
         var utilCommand = new Command("util");
         var packageCommand = new Command("package");
+        var updateCommand = new Command("update");
 
         var downloadOption = new Option<string>(name: "--download", description: "Installs a package");
         downloadOption.AddAlias("-D");
@@ -41,6 +47,8 @@ class Program {
         
         var debugOption = new Option<bool>(name: "--debug", description: "Enables debug logging");
 
+        var sandboxOption = new Option<bool>(name: "--sandbox", description: "Enables sandboxing (see docs)");
+
         var listInstalledOption = new Option<bool>(name: "--list-installed", description: "Lists all installed packages and their size in MB");
 
         var packFormulaOption = new Option<bool>(name: "--pack-formula", description: "Packs formula files into .tar");
@@ -51,8 +59,23 @@ class Program {
 
         var formulaInfoOption = new Option<string>(name: "--info", description: "Displays information about a formula");
 
+        var updateFormulaOption = new Option<bool>(name: "--formula", description: "Updates formula files");
+
+        var updateSystemOption = new Option<bool>(name: "--system", description: "Installs all pending system updates");
+
+        var updateCheckOption = new Option<bool>(name: "--check", description: "Checks if there are any pending updates. Remember to update formula files before checking for new updates");
+
+
         rootCommand.Add(unlockOption);
-        rootCommand.AddGlobalOption(debugOption); // this doesnt work
+        rootCommand.AddGlobalOption(debugOption);
+        rootCommand.AddGlobalOption(sandboxOption);
+        // NOTE: This is an awful hack but I don't care. I blame the library
+        if (args.Contains("--debug")) {
+            Globals.IsDebugMode = true;
+        }
+        if (args.Contains("--sandbox")) {
+            Globals.IsSandboxMode = true;
+        }
 
         utilCommand.Add(testOption);
         utilCommand.Add(packFormulaOption);
@@ -65,8 +88,13 @@ class Program {
         packageCommand.Add(findFormulaOption);
         packageCommand.Add(formulaInfoOption);
 
+        updateCommand.Add(updateFormulaOption);
+        updateCommand.Add(updateSystemOption);
+        updateCommand.Add(updateCheckOption);
+
         rootCommand.AddCommand(utilCommand);
         rootCommand.AddCommand(packageCommand);
+        rootCommand.AddCommand(updateCommand);
 
         rootCommand.SetHandler((unlockOptionValue, debugOptionValue) => {
             if (File.Exists(Globals.PAKA_BASEDIR + ".lock")) {
@@ -116,12 +144,114 @@ class Program {
             }
         }, downloadOption, cleanOption, listInstalledOption, findFormulaOption, uninstallOption, formulaInfoOption);
 
+        updateCommand.SetHandler((updateFormulaOptionValue, updateSystemOptionValue, updateCheckOptionValue) => {
+            if (updateFormulaOptionValue) {
+                UpdateFormula();
+            }
+            if (updateSystemOptionValue) {
+                UpdateSystem();
+            }
+            if (updateCheckOptionValue) {
+                GetAllPendingUpdates();
+            }
+        }, updateFormulaOption, updateSystemOption, updateCheckOption);
 
         rootCommand.Invoke(args);
         if (args.Length == 0) {
             Console.WriteLine($"Iterkocze Paka {Globals.VERSION}");
             Console.WriteLine("--h or --help for list of switches");
         }
+    }
+
+    private static void UpdateFormula() {
+        Log.Info("Updating formula files...");
+        Directory.SetCurrentDirectory(Globals.PAKA_BASEDIR);
+        Log.Debug("Checking for formula.old");
+        if (Directory.Exists("formula.old")) {
+            Directory.Delete("formula.old", true);
+            Log.Debug("formula.old found and removed");
+        }
+        Log.Debug("Creating backup of current formulas");
+        Directory.Move("formula", "formula.old");
+        Log.Debug($"Renamed formula -> formula.old inside {Globals.PAKA_BASEDIR}");
+        Log.Debug("Downloading new formula.tar");
+        DownloadFile("https://github.com/Iterkocze-Company/IterkoczeOS-Packages-Main/raw/main/paka/formula.tar");
+        RunProcessAndWait("tar", "xf formula.tar");
+        Log.Debug("Removing formula.tar");
+        File.Delete("formula.tar");
+    }
+
+    public static void UpdateSystem() {
+        var pendingFormulas = GetAllPendingUpdates();
+
+        if (pendingFormulas.Length > 0 && !AskToProceed("Would you like to download and install them now?")) {
+            return;
+        }
+
+        foreach (var f in pendingFormulas) {
+            f.DoInstallProcedure();
+        }
+    }
+
+    private static Formula[] GetAllPendingUpdates() {
+        Log.Info("Scanning for pending updates...");
+        var installedIDs = LocalDatabase.GetInstalledUpdateIDs();
+        var allUpdateIDs = new List<uint>();
+
+        if (Globals.IsDebugMode) {
+            Log.Debug($"installedIDs:");
+            foreach (var installedID in installedIDs) {
+                Log.Debug(installedID.ToString());
+            }
+        }
+
+        foreach (var file in Directory.GetFiles(Globals.PAKA_FORMULADIR + "updates/")) {
+            allUpdateIDs.Add(uint.Parse(new Formula("updates/" + Path.GetFileName(file)).Properties["UPDATE_ID"].Value));
+        }
+
+        var pendingIDs = allUpdateIDs.Except(installedIDs);
+        var pendingFormulas = new List<Formula>();
+
+        Log.Info($"Found {pendingIDs.ToArray().Length} pending updates");
+
+        foreach (var f in LocalDatabase.GetAllFormulas("updates")) {
+            if (pendingIDs.Any(id => id == uint.Parse(f.Properties["UPDATE_ID"].Value)) ) {
+                pendingFormulas.Add(f);
+                System.Console.WriteLine(f.Name);
+            }
+        }
+
+        return pendingFormulas.ToArray();
+    }
+
+    private static void DownloadFile(string fileURL) {
+        // https://github.com/Iterkocze-Company/IterkoczeOS-Packages-Main/raw/main/paka/formula.tar
+        Process wget = new();
+        wget.StartInfo.FileName = "wget";
+        wget.StartInfo.RedirectStandardOutput = true;
+        wget.StartInfo.RedirectStandardInput = true;
+        wget.StartInfo.Arguments = fileURL + " -q --show-progress";
+        wget.Start();
+        wget.WaitForExit();
+        if (wget.ExitCode != 0) {
+            Log.Error($"wget failed! Do you have internet connection?");
+            Environment.Exit(1);
+        }
+    }
+
+    private static void RunProcessAndWait(string name, string args = "") {
+        Process wget = new();
+        wget.StartInfo.FileName = name;
+        wget.StartInfo.RedirectStandardOutput = true;
+        wget.StartInfo.RedirectStandardInput = true;
+        wget.StartInfo.Arguments = args;
+        wget.Start();
+        wget.WaitForExit();
+        if (wget.ExitCode != 0) {
+            Log.Error($"{name} failed!");
+            Environment.Exit(1);
+        }
+
     }
 
     private static void FindFormula(string name) {
@@ -154,19 +284,20 @@ class Program {
 
         Console.WriteLine($"Formula information for: {name}");
         Console.WriteLine($"Formula type: {f.GetFormulaType()}");
-        Console.WriteLine($"Description: {f.Properties["DESC"]}");
+        Console.WriteLine($"Description: {f.Properties["DESC"].Value}");
     }
 
     private static void PackFormulaFiles() {
+        if (!Directory.Exists(Globals.PAKA_LOCAL_REPO_MAIN)) {
+            Log.Error($"Directory not found: {Globals.PAKA_LOCAL_REPO_MAIN}");
+            return;
+        }
+
         Log.Info("Packaging all formula files...");
         Directory.SetCurrentDirectory(Globals.PAKA_BASEDIR);
-        var p = System.Diagnostics.Process.Start("tar", "cf formula.tar formula");
-        p.WaitForExit();
-        if (p.ExitCode != 0) {
-            Log.Error("tar exited with non-zero exit code");
-        } else {
-            Log.Info("tar archive created");
-        }
+        RunProcessAndWait("tar", "cf formula.tar formula");
+        File.Move("formula.tar", Globals.PAKA_LOCAL_REPO_MAIN + "paka/formula.tar");
+        Log.Info($"tar archive created and moved to {Globals.PAKA_LOCAL_REPO_MAIN + "paka/formula.tar"}");
     }
 
     private static void ListInstalledPackages() {
@@ -218,21 +349,22 @@ class Program {
         List<Formula> depsToinstall = Formula.ToplevelPackage.ResolveDependencies().Where(dep => !LocalDatabase.IsInstalled(dep.Name)).ToList();
         depsToinstall.Reverse();
         
-        if (depsToinstall.Count > 0) {
-            Console.WriteLine("The following packages will be installed (in this order)");
-            foreach (Formula dep in depsToinstall) {
-                Console.WriteLine("\t" + dep.Name);
-            }
-            Console.WriteLine("\t" + Formula.ToplevelPackage.Name);
-            if (!AskToProceed("Do you want to continue?")) 
-                Environment.Exit(0);
-
-            foreach (Formula dep in depsToinstall) {
-                dep.DoInstallProcedure();
-            }
-        } else {
-            Log.Success("All dependencies satisfied");
+        if (Globals.IsSandboxMode) {
+            Log.Warning("[ SANDBOX MODE ENABLED ]");
         }
+
+        Console.WriteLine("The following packages will be installed (in this order)");
+        foreach (Formula dep in depsToinstall) {
+            Console.WriteLine("\t" + dep.Name);
+        }
+        Console.WriteLine("\t" + Formula.ToplevelPackage.Name);
+        if (!AskToProceed("Do you want to continue?")) 
+            Environment.Exit(0);
+
+        foreach (Formula dep in depsToinstall) {
+            dep.DoInstallProcedure();
+        }
+         
         Log.Info($"installing {Formula.ToplevelPackage.Name}...");
         Formula.ToplevelPackage.DoInstallProcedure();
     }

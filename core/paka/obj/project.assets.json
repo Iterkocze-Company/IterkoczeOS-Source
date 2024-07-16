@@ -1,72 +1,7 @@
 {
   "version": 3,
   "targets": {
-    "net7.0": {
-      "Iterkocze.LibiterkoczeOS/1.0.1": {
-        "type": "package",
-        "compile": {
-          "lib/net7.0/cs-wrapper.dll": {}
-        },
-        "runtime": {
-          "lib/net7.0/cs-wrapper.dll": {}
-        }
-      },
-      "System.CommandLine/2.0.0-beta4.22272.1": {
-        "type": "package",
-        "compile": {
-          "lib/net6.0/System.CommandLine.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net6.0/System.CommandLine.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "resource": {
-          "lib/net6.0/cs/System.CommandLine.resources.dll": {
-            "locale": "cs"
-          },
-          "lib/net6.0/de/System.CommandLine.resources.dll": {
-            "locale": "de"
-          },
-          "lib/net6.0/es/System.CommandLine.resources.dll": {
-            "locale": "es"
-          },
-          "lib/net6.0/fr/System.CommandLine.resources.dll": {
-            "locale": "fr"
-          },
-          "lib/net6.0/it/System.CommandLine.resources.dll": {
-            "locale": "it"
-          },
-          "lib/net6.0/ja/System.CommandLine.resources.dll": {
-            "locale": "ja"
-          },
-          "lib/net6.0/ko/System.CommandLine.resources.dll": {
-            "locale": "ko"
-          },
-          "lib/net6.0/pl/System.CommandLine.resources.dll": {
-            "locale": "pl"
-          },
-          "lib/net6.0/pt-BR/System.CommandLine.resources.dll": {
-            "locale": "pt-BR"
-          },
-          "lib/net6.0/ru/System.CommandLine.resources.dll": {
-            "locale": "ru"
-          },
-          "lib/net6.0/tr/System.CommandLine.resources.dll": {
-            "locale": "tr"
-          },
-          "lib/net6.0/zh-Hans/System.CommandLine.resources.dll": {
-            "locale": "zh-Hans"
-          },
-          "lib/net6.0/zh-Hant/System.CommandLine.resources.dll": {
-            "locale": "zh-Hant"
-          }
-        }
-      }
-    },
-    "net7.0/linux-x64": {
+    "net8.0": {
       "Iterkocze.LibiterkoczeOS/1.0.1": {
         "type": "package",
         "compile": {
@@ -218,7 +153,7 @@
     }
   },
   "projectFileDependencyGroups": {
-    "net7.0": [
+    "net8.0": [
       "Iterkocze.LibiterkoczeOS >= 1.0.1",
       "System.CommandLine >= 2.0.0-beta4.22272.1"
     ]
@@ -239,14 +174,14 @@
         "/home/user/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
-        "net7.0"
+        "net8.0"
       ],
       "sources": {
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
-        "net7.0": {
-          "targetAlias": "net7.0",
+        "net8.0": {
+          "targetAlias": "net8.0",
           "projectReferences": {}
         }
       },
@@ -254,11 +189,16 @@
         "warnAsError": [
           "NU1605"
         ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
       }
     },
     "frameworks": {
-      "net7.0": {
-        "targetAlias": "net7.0",
+      "net8.0": {
+        "targetAlias": "net8.0",
         "dependencies": {
           "Iterkocze.LibiterkoczeOS": {
             "target": "Package",
@@ -285,12 +225,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/programs/local/dotnet7-sdk/sdk/7.0.403/RuntimeIdentifierGraph.json"
-      }
-    },
-    "runtimes": {
-      "linux-x64": {
-        "#import": []
+        "runtimeIdentifierGraphPath": "/programs/local/dotnet8-sdk/sdk/8.0.302/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

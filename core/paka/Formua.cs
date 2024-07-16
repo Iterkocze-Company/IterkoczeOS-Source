@@ -10,10 +10,13 @@ public class Formula {
     public bool IsDirectlyInstalled {get; private set;}
     public bool IsInstalled {get; private set;}
 
+    public bool IsUpdate {get; private set;}
+
     public readonly Dictionary<string, Property> Properties = new() {
-        {"DESC", new() {IsRequired = false} },
-        {"SRC_URL", new() {IsRequired = true} },
-        {"DEPENDSON", new() {IsRequired = false} },
+        { "DESC", new() {IsRequired = false} },
+        { "SRC_URL", new() {IsRequired = true} },
+        { "DEPENDSON", new() {IsRequired = false} },
+        { "UPDATE_ID", new() {IsRequired = false} },
     };
     public Dictionary<string, bool> Switches {get; set;} = new Dictionary<string, bool>() {
         {"HOLD", false},
@@ -25,9 +28,13 @@ public class Formula {
 
     public List<Formula> Dependencies {get; set;} = new();
 
-    public Formula(string formulaFileName) {
-        Name = formulaFileName;
-        string formulaFilePath = Globals.PAKA_FORMULADIR + formulaFileName + ".formula";
+    public Formula(string formulaFileName, bool exact = false) {
+        //Name = formulaFileName;
+        Name = Path.GetFileName(formulaFileName);
+        string formulaFilePath = exact ? formulaFileName : Globals.PAKA_FORMULADIR + formulaFileName;
+        if (!formulaFilePath.EndsWith(".formula")) {
+            formulaFilePath = formulaFilePath + ".formula";
+        }
         var fileContent = File.ReadLines(formulaFilePath);
 
         InstallProcedure = string.Join(" && ", _ReadProcedure("INSTALL", fileContent, formulaFileName))[0..^3];
@@ -36,6 +43,9 @@ public class Formula {
 
         IsDirectlyInstalled = LocalDatabase.IsDirectlyInstalled(Name);
         IsInstalled = LocalDatabase.IsInstalled(Name);
+        IsUpdate = Properties["UPDATE_ID"].Value == "" ? false : true;
+
+        // NOTE: Shoudn't this file be closed by now?
     }
 
     public static Formula[] FormulasFromNames(string[] names) {
@@ -62,6 +72,9 @@ public class Formula {
 
         Directory.CreateDirectory($"/tmp/{Name}");
         Directory.SetCurrentDirectory($"/tmp/{Name}");
+        if (Globals.IsSandboxMode) {
+            Directory.CreateDirectory($"/tmp/paka-sandbox-{Name}");
+        }
 
         if (!Switches["NO_DOWNLOAD"]) {
             Log.Info("Downloading source...");
@@ -79,9 +92,10 @@ public class Formula {
             }
         }
 
+        // NOTE: This should not count up everything in the /usr/local dir
+        // Maybe use chroot?
         List<string> AllFilesBefore = Directory.GetFiles("/usr/local", "*.*", SearchOption.AllDirectories).ToList();
         AllFilesBefore.AddRange(Directory.GetFiles("/programs/local", "*.*", SearchOption.AllDirectories).ToList());
-
 
         Log.Info($"Executing BEGIN INSTALL for {Name}...");
 
@@ -98,15 +112,21 @@ public class Formula {
             installedSizeMB += fi.Length / (1024 * 1024); 
         }
 
-        Log.Debug($"Registering {Name} in the database...");
-        LocalDatabase.RegisterPackage(Name);
+
+        if (!IsUpdate) {
+            Log.Debug($"Registering {Name} in the database...");
+            LocalDatabase.RegisterPackage(Name);      
+            LocalDatabase.WriteDBFile(Name, "remove.db", AllFilesInstalled, false);
+            LocalDatabase.WriteDBFile(Name, "size.db", new string[]{installedSizeMB.ToString()}, false);
+        } else {
+            Log.Debug($"Registering ID for {Name} as installed...");
+            LocalDatabase.MarkUpdateIDAsInstalled(uint.Parse(Properties["UPDATE_ID"].Value));
+        }
+
+        // NOTE: Toplevel package is never set for updates
         if (ToplevelPackage != null && ToplevelPackage.Name == Name) {
             LocalDatabase.MarkAsDirectlyInstalled(Name);
         }
-        
-        LocalDatabase.WriteDBFile(Name, "remove.db", AllFilesInstalled, false);
-        LocalDatabase.WriteDBFile(Name, "size.db", new string[]{installedSizeMB.ToString()}, false);
-
         if (!Switches["HOLD"]) {
             Log.Info("Deleting temporary data...");
             Directory.Delete($"/tmp/{Name}", true);
@@ -155,7 +175,7 @@ public class Formula {
     }
 
     public static void ValidateAll() {
-        string[] allFormulaFiles = Directory.GetFiles(Globals.PAKA_FORMULADIR);
+        /*string[] allFormulaFiles = Directory.GetFiles(Globals.PAKA_FORMULADIR, "*.*");
         List<string> names = new();
         foreach (var file in allFormulaFiles) {
             if (file.EndsWith("example.formula"))
@@ -169,6 +189,17 @@ public class Formula {
         }
         foreach (var formula in formulas) {
             formula.Validate();
+        }*/
+
+        // TODO: This is a hack for now
+        var allFormulas = LocalDatabase.GetAllFormulas();
+        var allUpdates = new List<Formula>();
+        foreach (var i in Directory.GetFiles(Globals.PAKA_FORMULADIR + "updates")) {
+            allUpdates.Add(new Formula("updates/" + Path.GetFileName(i)));
+        }
+        var allall = allFormulas.Concat(allUpdates);
+        foreach (var formulas in allall) {
+            formulas.Validate();
         }
     }
 
@@ -200,6 +231,7 @@ public class Formula {
             Log.Warning($"{Name} is both SRC and BIN");
         }
 
+        // TODO: This should maybe be a exception instead of exiting the program
         if (errors > 0) {
             Log.Error($"Can't continiue, because this formula file contains {errors} critical errors");
             Environment.Exit(1);
@@ -220,6 +252,8 @@ public class Formula {
     }
 
     private string[] _ReadProcedure(string procName, IEnumerable<string> fileContent, string fileName) {
+        Log.Debug($"Parsing {procName} for {fileName}...");
+
         bool insideProcedure = false;
         bool beginFound = false;
         bool endFound = false;
@@ -308,6 +342,7 @@ public class Formula {
         export CORES={Environment.ProcessorCount} 
         export LOCAL=""/usr/local/""
         export USER_HOME=""/home/{Iterkocze.LibiterkoczeOS.GetSystemUser()}""
+        export ROOT=""{(Globals.IsSandboxMode ? $"/tmp/paka-sandbox-{Name}" : "/")}""
         ");
         p.StandardInput.Write(procedure);
         p.StandardInput.Close();

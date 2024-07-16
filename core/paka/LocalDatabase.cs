@@ -66,13 +66,25 @@ public static class LocalDatabase {
         return ret.ToArray();
     }
 
-    public static Formula[] GetAllFormulas() {
+    // NOTE: Isn't this kinda dangerous?
+    // What if I have hundrets of formula files in the future and it's going to use 69420 GB of RAM?
+    // This is silly. This is silly and danger
+    public static Formula[] GetAllFormulas(string onlyInDir = "") {
+        string searchDir = onlyInDir == "" ? Globals.PAKA_FORMULADIR : Globals.PAKA_FORMULADIR + onlyInDir;
         List<Formula> ret = new();
-        foreach (string name in Directory.GetFiles(Globals.PAKA_FORMULADIR)) {
+        foreach (string name in Directory.GetFiles(searchDir)) {
             var f = Formula.FormulaFileToName(name);
-            ret.Add(new Formula(f));
+            ret.Add(new Formula(onlyInDir + "/" + f));
         }
 
         return ret.ToArray();
+    }
+
+    public static List<uint> GetInstalledUpdateIDs() {
+        return File.ReadAllLines(Globals.DB_LOCAL_UPDATE_FILE).Select(uint.Parse).ToList();
+    }
+
+    public static void MarkUpdateIDAsInstalled(uint id) {
+        File.AppendAllText(Globals.DB_LOCAL_UPDATE_FILE, $"{id.ToString()}\n");
     }
 }

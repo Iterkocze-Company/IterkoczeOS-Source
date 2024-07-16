@@ -23,9 +23,10 @@
 /sources/core/paka/obj/Release/net7.0/linux-x64/paka.AssemblyInfoInputs.cache
 /sources/core/paka/obj/Release/net7.0/linux-x64/paka.AssemblyInfo.cs
 /sources/core/paka/obj/Release/net7.0/linux-x64/paka.csproj.CoreCompileInputs.cache
-/sources/core/paka/obj/Release/net7.0/linux-x64/paka.csproj.CopyComplete
 /sources/core/paka/obj/Release/net7.0/linux-x64/paka.dll
 /sources/core/paka/obj/Release/net7.0/linux-x64/refint/paka.dll
 /sources/core/paka/obj/Release/net7.0/linux-x64/paka.pdb
 /sources/core/paka/obj/Release/net7.0/linux-x64/paka.genruntimeconfig.cache
 /sources/core/paka/obj/Release/net7.0/linux-x64/ref/paka.dll
+/sources/core/paka/obj/Release/net7.0/linux-x64/paka.sourcelink.json
+/sources/core/paka/obj/Release/net7.0/linux-x64/paka.csproj.Up2Date
