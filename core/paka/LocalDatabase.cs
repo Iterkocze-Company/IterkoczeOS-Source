@@ -72,9 +72,8 @@ public static class LocalDatabase {
     public static Formula[] GetAllFormulas(string onlyInDir = "") {
         string searchDir = onlyInDir == "" ? Globals.PAKA_FORMULADIR : Globals.PAKA_FORMULADIR + onlyInDir;
         List<Formula> ret = new();
-        foreach (string name in Directory.GetFiles(searchDir)) {
-            var f = Formula.FormulaFileToName(name);
-            ret.Add(new Formula(onlyInDir + "/" + f));
+        foreach (string name in Directory.GetFiles(searchDir, "*.*", SearchOption.AllDirectories)) {
+            ret.Add(new Formula(Path.GetRelativePath(Globals.PAKA_FORMULADIR, name)));
         }
 
         return ret.ToArray();
@@ -86,5 +85,16 @@ public static class LocalDatabase {
 
     public static void MarkUpdateIDAsInstalled(uint id) {
         File.AppendAllText(Globals.DB_LOCAL_UPDATE_FILE, $"{id.ToString()}\n");
+    }
+
+    // TODO: This can crash if the file has invalid data
+    public static uint GetUpdateVersion() {
+        uint ret = 0;
+
+        foreach (var line in File.ReadAllLines(Globals.DB_LOCAL_UPDATE_FILE)) {
+            ret += uint.Parse(line);
+        }
+
+        return ret;
     }
 }

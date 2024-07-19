@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("paka")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+42df503afcb5d0eb01514e7bce5f3058643e094d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e700887a21832598f2efb70ab4f271b7f490b1ac")]
 [assembly: System.Reflection.AssemblyProductAttribute("paka")]
 [assembly: System.Reflection.AssemblyTitleAttribute("paka")]
 

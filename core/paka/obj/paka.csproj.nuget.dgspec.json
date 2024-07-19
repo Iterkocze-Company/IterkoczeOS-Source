@@ -47,6 +47,12 @@
               "target": "Package",
               "version": "[1.0.1, )"
             },
+            "Microsoft.NET.ILLink.Tasks": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.6, )",
+              "autoReferenced": true
+            },
             "System.CommandLine": {
               "target": "Package",
               "version": "[2.0.0-beta4.22272.1, )"
@@ -69,6 +75,11 @@
             }
           },
           "runtimeIdentifierGraphPath": "/programs/local/dotnet8-sdk/sdk/8.0.302/PortableRuntimeIdentifierGraph.json"
+        }
+      },
+      "runtimes": {
+        "linux-x64": {
+          "#import": []
         }
       }
     }

@@ -64,3 +64,5 @@
 # 5.0.6 Bugfix - Reversed the package install order, packages that are dependencies of other installed packages can't be uninstalled with `-U`, removed empty `--update` switch, updating moved to scripts
 
 # 5.1.0 Debug option fixed, sandboxing added, update formula option added, update module added, system update added, fixed a bug where the package description didn't display properly
+
+# 5.2.0 Added folder handling, so that now formula files can be inside nested directories, better formula file validation

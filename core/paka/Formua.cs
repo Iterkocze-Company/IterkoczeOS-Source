@@ -1,12 +1,13 @@
 using System.Text;
 using System.Linq;
 using System.Diagnostics;
+using System.Reflection;
 
 public class Formula {
     public static Formula? ToplevelPackage = null;
     public string Name {get; set;}
-    public string InstallProcedure {get; private set;}
-    public string RemoveProcedure {get; private set;}
+    //public string InstallProcedure {get; private set;}
+    //public string RemoveProcedure {get; private set;}
     public bool IsDirectlyInstalled {get; private set;}
     public bool IsInstalled {get; private set;}
 
@@ -18,6 +19,7 @@ public class Formula {
         { "DEPENDSON", new() {IsRequired = false} },
         { "UPDATE_ID", new() {IsRequired = false} },
     };
+    // NOTE: Maybe Switches and Procedures should have enums as keys instead of strings
     public Dictionary<string, bool> Switches {get; set;} = new Dictionary<string, bool>() {
         {"HOLD", false},
         {"AUTO_REMOVE", false},
@@ -26,20 +28,33 @@ public class Formula {
         {"SRC", false},
     };
 
+    public Dictionary<string, Procedure> Procedures = new() {
+        { "INFO", new() {Name = "INFO", IsRequired = true} },
+        { "INSTALL", new() {Name = "INSTALL", IsRequired = true} },
+        { "REMOVE", new() {Name = "REMOVE", IsRequired = false} },
+    };
+
     public List<Formula> Dependencies {get; set;} = new();
 
-    public Formula(string formulaFileName, bool exact = false) {
-        //Name = formulaFileName;
-        Name = Path.GetFileName(formulaFileName);
-        string formulaFilePath = exact ? formulaFileName : Globals.PAKA_FORMULADIR + formulaFileName;
+    public Formula(string formulaRelativePath) {
+        Name = Path.GetFileName(formulaRelativePath);
+        string formulaFilePath = Globals.PAKA_FORMULADIR + formulaRelativePath;
+
         if (!formulaFilePath.EndsWith(".formula")) {
-            formulaFilePath = formulaFilePath + ".formula";
+            formulaFilePath += ".formula";
         }
+
+        if (!File.Exists(formulaFilePath)) {
+            throw new FileNotFoundException($"This formula file can't be found: {formulaFilePath}");
+        }
+        
         var fileContent = File.ReadLines(formulaFilePath);
 
-        InstallProcedure = string.Join(" && ", _ReadProcedure("INSTALL", fileContent, formulaFileName))[0..^3];
-        RemoveProcedure = string.Join(" && ", _ReadProcedure("REMOVE", fileContent, formulaFileName))[0..^3];
-        _EvalInfoProcedure(_ReadProcedure("INFO", fileContent, formulaFileName));
+        _ReadProcedure(Procedures["INFO"], fileContent, formulaRelativePath);
+        _ReadProcedure(Procedures["INSTALL"], fileContent, formulaRelativePath);
+        _ReadProcedure(Procedures["REMOVE"], fileContent, formulaRelativePath);
+
+        _EvalInfoProcedure(Procedures["INFO"].Value);
 
         IsDirectlyInstalled = LocalDatabase.IsDirectlyInstalled(Name);
         IsInstalled = LocalDatabase.IsInstalled(Name);
@@ -57,18 +72,9 @@ public class Formula {
         return ret.ToArray();
     }
 
-    public static bool Exists(string formulaFileName) {
-        if (!File.Exists(Globals.PAKA_FORMULADIR + formulaFileName + ".formula")) {
-            return false;
-        }
-        return true;
-    }
-
     public void DoInstallProcedure() {
         Log.Info($"Resolving install procedure for {Name}...");
         Thread.Sleep(1000);
-
-        Validate();
 
         Directory.CreateDirectory($"/tmp/{Name}");
         Directory.SetCurrentDirectory($"/tmp/{Name}");
@@ -99,7 +105,7 @@ public class Formula {
 
         Log.Info($"Executing BEGIN INSTALL for {Name}...");
 
-        _RunProcess(InstallProcedure);
+        _RunProcess(string.Join(" && ", Procedures["INSTALL"].Value)[0..^3]);
 
         List<string> AllFilesAfter = Directory.GetFiles("/usr/local", "*.*", SearchOption.AllDirectories).ToList();
         AllFilesAfter.AddRange(Directory.GetFiles("/programs/local", "*.*", SearchOption.AllDirectories).ToList());
@@ -123,7 +129,7 @@ public class Formula {
             LocalDatabase.MarkUpdateIDAsInstalled(uint.Parse(Properties["UPDATE_ID"].Value));
         }
 
-        // NOTE: Toplevel package is never set for updates
+        // Toplevel package is never set for updates
         if (ToplevelPackage != null && ToplevelPackage.Name == Name) {
             LocalDatabase.MarkAsDirectlyInstalled(Name);
         }
@@ -137,8 +143,6 @@ public class Formula {
         Log.Info($"Resolving remove procedure for {Name}...");
         Thread.Sleep(1000);
 
-        Validate();
-
         if (Switches["AUTO_REMOVE"]) {
             Log.Info($"Executing AUTO_REMOVE for {Name}...");
             var filesToRemove = LocalDatabase.ReadDBFile(Name, "remove.db");
@@ -147,7 +151,8 @@ public class Formula {
                 File.Delete(file);
             }
         } else {
-            _RunProcess(RemoveProcedure);
+            Log.Info($"Executing BEGIN REMOVE for {Name}...");
+            _RunProcess(string.Join(" && ", Procedures["REMOVE"].Value)[0..^3]);
         }
         LocalDatabase.UnregisterPackage(Name);
         if (ToplevelPackage != null && ToplevelPackage.Name == Name) {
@@ -175,31 +180,10 @@ public class Formula {
     }
 
     public static void ValidateAll() {
-        /*string[] allFormulaFiles = Directory.GetFiles(Globals.PAKA_FORMULADIR, "*.*");
-        List<string> names = new();
-        foreach (var file in allFormulaFiles) {
-            if (file.EndsWith("example.formula"))
-                continue;
-            var parts = file.Split('/');
-            names.Add(parts[parts.Length - 1]);
-        }
-        List<Formula> formulas = new();
-        foreach (var name in names) {
-            formulas.Add(new(name.Replace(".formula", "")));
-        }
-        foreach (var formula in formulas) {
-            formula.Validate();
-        }*/
-
-        // TODO: This is a hack for now
         var allFormulas = LocalDatabase.GetAllFormulas();
-        var allUpdates = new List<Formula>();
-        foreach (var i in Directory.GetFiles(Globals.PAKA_FORMULADIR + "updates")) {
-            allUpdates.Add(new Formula("updates/" + Path.GetFileName(i)));
-        }
-        var allall = allFormulas.Concat(allUpdates);
-        foreach (var formulas in allall) {
-            formulas.Validate();
+
+        foreach (var formula in allFormulas) {
+            formula.Validate();
         }
     }
 
@@ -212,30 +196,48 @@ public class Formula {
             return "Unknown";
     }
 
-    public void Validate() {
-        int errors = 0;
+    public uint Validate() {
+        uint errors = 0;
 
         Log.Info($"validating {Name}...");
 
         foreach (var prop in Properties) {
             if (prop.Value.Value == "" && prop.Value.IsRequired) {
+                Console.Write("\t");
                 Log.Error($"{prop.Key} is required, but not set");
+                errors++;
+            }
+        }
+        foreach (var proc in Procedures) {
+            if (proc.Value.State == Procedure.STATE.INVALID) {
+                Console.Write("\t");
+                Log.Error($"{proc.Value.Name} procedure is invalid");
+                errors++;
+            }
+            if (proc.Value.State == Procedure.STATE.UNITITIALISED) {
+                Console.Write("\t");
+                Log.Error($"{proc.Value.Name} procedure is UNITITIALISED");
                 errors++;
             }
         }
 
         if (Switches["HOLD"]) {
-            Log.Warning($"{Name} has HOLD enabled");
+            Console.Write("\t");
+            Log.Warning("has HOLD enabled");
         }
         if (Switches["SRC"] && Switches["BIN"]) {
-            Log.Warning($"{Name} is both SRC and BIN");
+            Console.Write("\t");
+            Log.Error("is both SRC and BIN");
+            errors++;
         }
 
-        // TODO: This should maybe be a exception instead of exiting the program
-        if (errors > 0) {
-            Log.Error($"Can't continiue, because this formula file contains {errors} critical errors");
-            Environment.Exit(1);
+        if (Properties["UPDATE_ID"].Value == "" && Name.StartsWith("update-")) {
+            Console.Write("\t");
+            Log.Error($"{Name} is considered to be an update because it starts with 'update-', but its UPDATE_ID is not set");
+            errors++;
         }
+
+        return errors;
     }
 
     /// <summary>
@@ -251,8 +253,9 @@ public class Formula {
         return name;
     }
 
-    private string[] _ReadProcedure(string procName, IEnumerable<string> fileContent, string fileName) {
-        Log.Debug($"Parsing {procName} for {fileName}...");
+    // TODO: This should be moved to the Procedure class
+    private void _ReadProcedure(Procedure proc, IEnumerable<string> fileContent, string fileName) {
+        Log.Debug($"Parsing {proc.Name} for {fileName}...");
 
         bool insideProcedure = false;
         bool beginFound = false;
@@ -260,14 +263,14 @@ public class Formula {
         StringBuilder sb = new();
 
         foreach (string line in fileContent) {
-            if (line.StartsWith($"BEGIN {procName}")) {
+            if (line.StartsWith($"BEGIN {proc.Name}")) {
                 insideProcedure = true;
                 beginFound = true;
                 continue;
             }
 
             if (insideProcedure) {
-                if (line.StartsWith($"END {procName}")) {
+                if (line.StartsWith($"END {proc.Name}")) {
                     insideProcedure = false;
                     endFound = true;
                     sb.AppendLine(":");
@@ -279,11 +282,12 @@ public class Formula {
         }
 
         if (!beginFound || !endFound) {
-            Log.Error($"Procedure {procName} was not found in {fileName}.formula");
-            Environment.Exit(1);
+            proc.State = Procedure.STATE.INVALID;
+            return;
         }
 
-        return sb.ToString().Split(Environment.NewLine.ToCharArray());
+        proc.Value = sb.ToString().Split(Environment.NewLine.ToCharArray());
+        proc.State = Procedure.STATE.VALID;
     }
 
     private void _EvalInfoProcedure(IEnumerable<string> content) {

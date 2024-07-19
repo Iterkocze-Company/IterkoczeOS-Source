@@ -6,7 +6,6 @@ class Program {
     private static void CheckAndInit() {
         var requiredFiles = new string[] { 
             Globals.PAKA_DBDIR + "direct",
-            Globals.DB_LOCAL_UPDATE_FILE 
         };
 
         foreach (var requiredFile in requiredFiles) {
@@ -27,7 +26,7 @@ class Program {
             DeleteLockfile();
         };
         AppDomain.CurrentDomain.ProcessExit += ProcessExit;
-        var rootCommand = new RootCommand($"Iterkocze Paka {Globals.VERSION}");
+        var rootCommand = new RootCommand();
         var utilCommand = new Command("util");
         var packageCommand = new Command("package");
         var updateCommand = new Command("update");
@@ -158,7 +157,7 @@ class Program {
 
         rootCommand.Invoke(args);
         if (args.Length == 0) {
-            Console.WriteLine($"Iterkocze Paka {Globals.VERSION}");
+            Console.WriteLine($"Iterkocze Paka {Globals.VERSION}\nSystem update version: {LocalDatabase.GetUpdateVersion()}");
             Console.WriteLine("--h or --help for list of switches");
         }
     }
@@ -183,6 +182,15 @@ class Program {
 
     public static void UpdateSystem() {
         var pendingFormulas = GetAllPendingUpdates();
+        
+        uint errors = 0;
+        foreach (var f in pendingFormulas) {
+            errors += f.Validate();
+        }
+        if (errors > 0) {
+            Log.Error("Can't continue because of errors");
+            Environment.Exit(1);
+        }
 
         if (pendingFormulas.Length > 0 && !AskToProceed("Would you like to download and install them now?")) {
             return;
@@ -206,7 +214,12 @@ class Program {
         }
 
         foreach (var file in Directory.GetFiles(Globals.PAKA_FORMULADIR + "updates/")) {
-            allUpdateIDs.Add(uint.Parse(new Formula("updates/" + Path.GetFileName(file)).Properties["UPDATE_ID"].Value));
+            if (uint.TryParse(new Formula("updates/" + Path.GetFileName(file)).Properties["UPDATE_ID"].Value, out uint id)) {
+                allUpdateIDs.Add(id);
+            } else {
+                Log.Error($"{Path.GetFileName(file)}: Update ID was not a number or not set");
+                Environment.Exit(1);
+            }
         }
 
         var pendingIDs = allUpdateIDs.Except(installedIDs);
@@ -318,10 +331,6 @@ class Program {
     }
 
     private static void DoPackageUninstall(string packageName) {
-        if (!Formula.Exists(packageName)) {
-            Log.Error($"{packageName}.formula can't be found");
-            Environment.Exit(1);
-        }
         if (!LocalDatabase.IsInstalled(packageName)) {
             Log.Error($"{packageName} is not installed");
             Environment.Exit(1);
@@ -332,32 +341,46 @@ class Program {
         }
 
         Formula packageToUninstall = new(packageName);
+        if (packageToUninstall.Validate() > 0) {
+            Log.Error("Can't continue because of errors");
+            Environment.Exit(1);
+        }
         packageToUninstall.DoRemoveProcedure();
     }
 
     private static void DoPackageInstall(string packageName) {
-        if (!Formula.Exists(packageName)) {
-            Log.Error($"{packageName}.formula can't be found");
-            Environment.Exit(1);
-        }
+        Formula.ToplevelPackage = null;
+        List<Formula> depsToinstall = [];
         if (LocalDatabase.IsInstalled(packageName)) {
             Console.WriteLine($"{packageName} is already installed. If you want to update or reinstall this package, uninstall it first.\nIt's best to do a full removal of the package using -C");
             Environment.Exit(0);
         }
+
         Formula.ToplevelPackage = new(packageName);
         Log.Info("Calculating dependencies...");
-        List<Formula> depsToinstall = Formula.ToplevelPackage.ResolveDependencies().Where(dep => !LocalDatabase.IsInstalled(dep.Name)).ToList();
+        depsToinstall = Formula.ToplevelPackage.ResolveDependencies().Where(dep => !LocalDatabase.IsInstalled(dep.Name)).ToList();
+        
         depsToinstall.Reverse();
         
         if (Globals.IsSandboxMode) {
             Log.Warning("[ SANDBOX MODE ENABLED ]");
         }
 
+        uint? errors = 0;
+        errors += Formula.ToplevelPackage?.Validate();
+        foreach (var formula in depsToinstall) {
+            errors += formula.Validate();
+        }
+        if (errors > 0) {
+            Log.Error("Can't continue because of errors");
+            Environment.Exit(1);
+        }
+
         Console.WriteLine("The following packages will be installed (in this order)");
         foreach (Formula dep in depsToinstall) {
             Console.WriteLine("\t" + dep.Name);
         }
-        Console.WriteLine("\t" + Formula.ToplevelPackage.Name);
+        Console.WriteLine("\t" + Formula.ToplevelPackage?.Name);
         if (!AskToProceed("Do you want to continue?")) 
             Environment.Exit(0);
 
@@ -365,15 +388,11 @@ class Program {
             dep.DoInstallProcedure();
         }
          
-        Log.Info($"installing {Formula.ToplevelPackage.Name}...");
-        Formula.ToplevelPackage.DoInstallProcedure();
+        Log.Info($"installing {Formula.ToplevelPackage?.Name}...");
+        Formula.ToplevelPackage?.DoInstallProcedure();
     }
 
     private static void DoPackageClean(string packageName) {
-        if (!Formula.Exists(packageName)) {
-            Log.Error($"{packageName}.formula can't be found");
-            Environment.Exit(1);
-        }
         if (!LocalDatabase.IsInstalled(packageName)) {
             Log.Error($"{packageName} is not installed");
             Environment.Exit(0);
@@ -403,18 +422,15 @@ class Program {
             return;
         }
 
-        // foreach (var dep in Formula.ToplevelPackage.Dependencies) {
-        //     var rDeps = dep.GetReverseDependencies();
-        //     var preventingFormulas = rDeps.Where(rdep => rdep.IsInstalled && rdep.Name != Formula.ToplevelPackage.Name).ToArray();
-
-        //     if (preventingFormulas.Length > 0) {
-        //         Log.Info($"Dependency '{dep.Name}' won't be uninstalled, because the following installed packages depend on it:");
-        //         foreach (var p in preventingFormulas) {
-        //             Console.WriteLine("\t"+p.Name);
-        //         }
-        //         depsToRemove.Remove(dep);
-        //     }
-        // }
+        uint? errors = 0;
+        errors += Formula.ToplevelPackage?.Validate();
+        foreach (var formula in depsToRemove) {
+            errors += formula.Validate();
+        }
+        if (errors > 0) {
+            Log.Error("Can't continue because of errors");
+            Environment.Exit(1);
+        }
 
         Console.WriteLine("The following packages will be removed");
         Console.WriteLine("\t" + packageName);
@@ -428,8 +444,8 @@ class Program {
             dep.DoRemoveProcedure();
         }
 
-        Log.Info($"Removing {Formula.ToplevelPackage.Name}...");
-        Formula.ToplevelPackage.DoRemoveProcedure();
+        Log.Info($"Removing {Formula.ToplevelPackage?.Name}...");
+        Formula.ToplevelPackage?.DoRemoveProcedure();
     }
 
     public static bool AskToProceed(string msg) {
